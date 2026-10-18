@@ -1,0 +1,17 @@
+{
+  "ciglun3": {
+    "subtitle": "subtitles.shamaschizm.ciglun_moves",
+    "sounds": [ { "name": "ciglun:entity/ciglun3" } ]
+  },
+  "ciglun4": {
+    "subtitle": "subtitles.shamaschizm.ciglun_turns",
+    "sounds": [ { "name": "ciglun:entity/ciglun4" } ]
+  },
+  "ciglun6": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.ciglun_laser",
+    "sounds": [
+      { "name": "ciglun:entity/ciglun6" }
+    ]
+  }
+}

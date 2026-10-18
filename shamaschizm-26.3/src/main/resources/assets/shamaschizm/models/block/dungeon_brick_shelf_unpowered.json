@@ -1,0 +1,26 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "all": "shamaschizm:block/dungeon_bricks",
+    "particle": "shamaschizm:block/dungeon_bricks"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        4,
+        13
+      ],
+      "to": [
+        16,
+        12,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

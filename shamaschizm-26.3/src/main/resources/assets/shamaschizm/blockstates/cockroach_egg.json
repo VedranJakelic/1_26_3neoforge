@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "eggs=1": {
+      "model": "shamaschizm:block/cockroach_egg_1"
+    },
+    "eggs=2": {
+      "model": "shamaschizm:block/cockroach_egg_2"
+    },
+    "eggs=3": {
+      "model": "shamaschizm:block/cockroach_egg_3"
+    },
+    "eggs=4": {
+      "model": "shamaschizm:block/cockroach_egg_4"
+    }
+  }
+}

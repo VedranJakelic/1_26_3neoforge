@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:henge01",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 676956789,
+    "spacing": 24,
+    "separation": 8,
+
+    "type": "minecraft:random_spread"
+  }
+}

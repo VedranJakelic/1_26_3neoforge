@@ -1,0 +1,8 @@
+{
+  "type": "shamaschizm:ascent_glow_trim",
+  "template": "shamaschizm:ascent_armor_trim_smithing_template",
+  "base": "#minecraft:trimmable_armor",
+  "addition": "minecraft:glow_ink_sac",
+  "pattern": "shamaschizm:ascent",
+  "material": "shamaschizm:glow_ink"
+}

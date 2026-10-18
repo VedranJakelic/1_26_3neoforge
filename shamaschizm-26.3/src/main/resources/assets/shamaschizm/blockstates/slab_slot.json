@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "powered=false": { "model": "shamaschizm:block/slab_slot1" },
+    "powered=true":  { "model": "shamaschizm:block/slab_slot2" }
+  }
+}

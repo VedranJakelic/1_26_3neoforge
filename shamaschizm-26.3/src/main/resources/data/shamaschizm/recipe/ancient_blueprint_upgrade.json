@@ -1,0 +1,6 @@
+{
+  "type": "shamaschizm:blueprint_same_item",
+  "template": "shamaschizm:ancient_blueprint",
+  "base": { "neoforge:ingredient_type": "shamaschizm:upgradeable" },
+  "addition": "#c:gems/lapis"
+}

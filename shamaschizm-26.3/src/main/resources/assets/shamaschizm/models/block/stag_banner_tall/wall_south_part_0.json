@@ -1,0 +1,76 @@
+{
+  "textures": {
+    "cloth": "shamaschizm:block/stag_banner_tall",
+    "particle": "shamaschizm:block/stag_banner_tall",
+    "wood": "minecraft:block/oak_planks"
+  },
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0.995
+      ],
+      "to": [
+        16,
+        16,
+        1.005
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            4.0
+          ],
+          "texture": "#cloth"
+        },
+        "south": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            4.0
+          ],
+          "texture": "#cloth"
+        }
+      },
+      "shade": true
+    },
+    {
+      "from": [
+        0,
+        14.75,
+        0.35
+      ],
+      "to": [
+        16,
+        15.75,
+        1.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    }
+  ]
+}

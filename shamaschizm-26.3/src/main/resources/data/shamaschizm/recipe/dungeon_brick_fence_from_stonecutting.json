@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "shamaschizm:dungeon_bricks",
+  "result": {
+    "id": "shamaschizm:dungeon_brick_fence",
+    "count": 1
+  }
+}

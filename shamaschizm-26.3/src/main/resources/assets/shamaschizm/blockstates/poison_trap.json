@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=east,powered=false": { "model": "shamaschizm:block/poison_trap", "y": 270 },
+    "facing=east,powered=true":  { "model": "shamaschizm:block/poison_trap", "y": 270 },
+    "facing=north,powered=false": { "model": "shamaschizm:block/poison_trap", "y": 180 },
+    "facing=north,powered=true":  { "model": "shamaschizm:block/poison_trap", "y": 180 },
+    "facing=south,powered=false": { "model": "shamaschizm:block/poison_trap" },
+    "facing=south,powered=true":  { "model": "shamaschizm:block/poison_trap" },
+    "facing=west,powered=false": { "model": "shamaschizm:block/poison_trap", "y": 90 },
+    "facing=west,powered=true":  { "model": "shamaschizm:block/poison_trap", "y": 90 }
+  }
+}

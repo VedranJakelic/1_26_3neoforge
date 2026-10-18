@@ -1,0 +1,35 @@
+{
+  "required": true,
+  "package": "net.beamex.shamaschizm.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "CoffinSlabLootMixin",
+    "CiglunLootSlotMixin",
+    "SchizmPressurePlateMixin",
+    "SchizmTripWireMixin",
+    "SaintMobGoalsAccessor",
+    "SaintsCombatMovementMixin",
+    "LegacySoulDataMixin"
+  ],
+  "client": [
+    "PortalSkyDarknessMixin",
+    "PortalVisualUpdateMixin",
+    "SlabItemInHandMixin",
+    "CoffinSkeletonPoseMixin",
+    "TrippingPostChainAccessor",
+    "TrippingPostPassAccessor",
+    "TrippingGameRendererMixin",
+    "TrippingSoundEngineMixin",
+    "AntlerRenderStateMixin",
+    "AntlerExtractMixin",
+    "GuardianBeamInvoker",
+    "GallopJukeboxSoundMixin",
+    "AscentTrimTextureMixin",
+    "AncientArmorTrimMeshMixin",
+    "SlabFrameStateMixin",
+    "SlabFrameRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

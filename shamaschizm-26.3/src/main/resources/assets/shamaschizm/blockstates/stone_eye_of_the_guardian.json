@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "stage=0": {
+      "model": "shamaschizm:block/stone_eye1"
+    },
+    "stage=1": {
+      "model": "shamaschizm:block/stone_eye2"
+    },
+    "stage=2": {
+      "model": "shamaschizm:block/stone_eye3"
+    }
+  }
+}

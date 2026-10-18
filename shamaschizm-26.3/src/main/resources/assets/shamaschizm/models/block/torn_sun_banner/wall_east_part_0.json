@@ -1,0 +1,76 @@
+{
+  "textures": {
+    "cloth": "shamaschizm:block/torn_sun_banner",
+    "particle": "shamaschizm:block/torn_sun_banner",
+    "wood": "minecraft:block/oak_planks"
+  },
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [
+        0.995,
+        0,
+        0
+      ],
+      "to": [
+        1.005,
+        16,
+        16
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            4.0
+          ],
+          "texture": "#cloth"
+        },
+        "west": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            4.0
+          ],
+          "texture": "#cloth"
+        }
+      },
+      "shade": true
+    },
+    {
+      "from": [
+        0.35,
+        14.75,
+        0
+      ],
+      "to": [
+        1.65,
+        15.75,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    }
+  ]
+}

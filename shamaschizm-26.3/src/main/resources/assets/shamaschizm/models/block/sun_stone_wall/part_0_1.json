@@ -1,0 +1,57 @@
+{
+  "textures": {
+    "sun": "shamaschizm:block/sun_stone_wall",
+    "stone": "minecraft:block/stone",
+    "particle": "minecraft:block/stone"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            5.333333333333333,
+            5.333333333333333,
+            10.666666666666666
+          ],
+          "texture": "#sun"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            5.333333333333333,
+            5.333333333333333,
+            10.666666666666666
+          ],
+          "texture": "#sun"
+        },
+        "east": {
+          "texture": "#stone",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#stone",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#stone",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#stone",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

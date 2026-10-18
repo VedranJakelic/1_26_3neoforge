@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "shamaschizm:schizm_stone",
+    "shamaschizm:brazier",
+    "shamaschizm:third_eye_of_providence",
+    "shamaschizm:dungeon_bricks",
+    "shamaschizm:dungeon_brick_slab",
+    "shamaschizm:dungeon_brick_stairs",
+    "shamaschizm:dungeon_brick_wall",
+    "shamaschizm:dungeon_brick_fence",
+    "shamaschizm:dungeon_brick_shelf"
+  ]
+}

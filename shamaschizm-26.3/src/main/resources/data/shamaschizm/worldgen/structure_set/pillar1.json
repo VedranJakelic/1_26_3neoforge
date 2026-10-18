@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:pillar1",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 362930789,
+    "spacing": 18,
+    "separation": 1,
+
+    "type": "minecraft:random_spread"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "lit=false,waterlogged=false": { "model": "shamaschizm:block/brazier" },
+    "lit=false,waterlogged=true":  { "model": "shamaschizm:block/brazier" },
+    "lit=true,waterlogged=false":  { "model": "shamaschizm:block/brazier_lit" },
+    "lit=true,waterlogged=true":   { "model": "shamaschizm:block/brazier" }
+  }
+}

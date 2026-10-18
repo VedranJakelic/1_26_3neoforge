@@ -1,0 +1,7 @@
+{
+  "parent": "block/block",
+  "render_type": "cutout",
+  "textures": {
+    "particle": "shamaschizm:misc/schizm_portal/frame_00"
+  }
+}

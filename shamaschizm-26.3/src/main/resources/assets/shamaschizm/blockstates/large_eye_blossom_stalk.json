@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "shamaschizm:block/large_eye_blossom_stalk"
+    },
+    "hanging=true": {
+      "model": "shamaschizm:block/large_eye_blossom_stalk",
+      "x": 180
+    }
+  }
+}

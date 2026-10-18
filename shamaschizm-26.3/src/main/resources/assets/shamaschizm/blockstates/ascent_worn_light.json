@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "shamaschizm:block/ascent_worn_light"
+      }
+    }
+  ]
+}

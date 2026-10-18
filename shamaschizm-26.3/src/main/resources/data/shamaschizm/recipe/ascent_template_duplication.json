@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#S#",
+    "#C#",
+    "###"
+  ],
+  "key": {
+    "#": "minecraft:diamond",
+    "S": "shamaschizm:ascent_armor_trim_smithing_template",
+    "C": "minecraft:stone"
+  },
+  "result": {
+    "id": "shamaschizm:ascent_armor_trim_smithing_template",
+    "count": 2
+  }
+}

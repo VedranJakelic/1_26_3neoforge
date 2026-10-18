@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/sniffer_egg",
+  "textures": {
+    "top": "shamaschizm:block/giant_centipede_egg_top",
+    "bottom": "shamaschizm:block/giant_centipede_egg_bottom",
+    "north": "shamaschizm:block/giant_centipede_egg_north",
+    "south": "shamaschizm:block/giant_centipede_egg_south",
+    "east": "shamaschizm:block/giant_centipede_egg_east",
+    "west": "shamaschizm:block/giant_centipede_egg_west"
+  }
+}

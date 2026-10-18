@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "cloth": "shamaschizm:block/torn_eye_banner",
+    "particle": "shamaschizm:block/torn_eye_banner"
+  },
+  "render_type": "minecraft:cutout",
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        7.5
+      ],
+      "to": [
+        15,
+        16,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            8.0
+          ],
+          "texture": "#cloth"
+        },
+        "south": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            8.0
+          ],
+          "texture": "#cloth"
+        }
+      }
+    }
+  ]
+}

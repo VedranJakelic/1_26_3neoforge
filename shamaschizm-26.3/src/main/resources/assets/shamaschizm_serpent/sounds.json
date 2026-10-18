@@ -1,0 +1,38 @@
+{
+  "grab": {
+    "subtitle": "subtitles.shamaschizm.serpent.grab",
+    "sounds": [
+      {
+        "name": "shamaschizm:serpent/grab",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "idle_1": {
+    "subtitle": "subtitles.shamaschizm.serpent.idle_1",
+    "sounds": [
+      {
+        "name": "shamaschizm:serpent/idle_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "idle_2": {
+    "subtitle": "subtitles.shamaschizm.serpent.idle_2",
+    "sounds": [
+      {
+        "name": "shamaschizm:serpent/idle_2",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "idle_3": {
+    "subtitle": "subtitles.shamaschizm.serpent.idle_3",
+    "sounds": [
+      {
+        "name": "shamaschizm:serpent/idle_3",
+        "attenuation_distance": 24
+      }
+    ]
+  }
+}

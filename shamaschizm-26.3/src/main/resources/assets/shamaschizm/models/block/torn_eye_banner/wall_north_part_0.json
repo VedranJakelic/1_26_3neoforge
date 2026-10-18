@@ -1,0 +1,76 @@
+{
+  "textures": {
+    "cloth": "shamaschizm:block/torn_eye_banner",
+    "particle": "shamaschizm:block/torn_eye_banner",
+    "wood": "minecraft:block/oak_planks"
+  },
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        14.995
+      ],
+      "to": [
+        16,
+        16,
+        15.005
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            8.0
+          ],
+          "texture": "#cloth"
+        },
+        "south": {
+          "uv": [
+            0,
+            0.0,
+            16,
+            8.0
+          ],
+          "texture": "#cloth"
+        }
+      },
+      "shade": true
+    },
+    {
+      "from": [
+        0,
+        14.75,
+        14.35
+      ],
+      "to": [
+        16,
+        15.75,
+        15.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    }
+  ]
+}

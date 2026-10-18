@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:pond02",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 123456999,
+    "spacing": 24,
+    "separation": 8,
+
+    "type": "minecraft:random_spread"
+  }
+}

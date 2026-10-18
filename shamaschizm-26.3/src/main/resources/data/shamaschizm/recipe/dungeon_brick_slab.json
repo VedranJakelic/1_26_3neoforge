@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": "shamaschizm:dungeon_bricks"
+  },
+  "result": {
+    "id": "shamaschizm:dungeon_brick_slab",
+    "count": 6
+  }
+}

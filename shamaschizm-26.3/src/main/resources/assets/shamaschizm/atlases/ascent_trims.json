@@ -1,0 +1,140 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_amethyst"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_amethyst"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_copper"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_copper"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_copper_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_copper_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_diamond"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_diamond"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_diamond_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_diamond_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_emerald"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_emerald"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_glow_ink"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_glow_ink"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_gold"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_gold"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_gold_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_gold_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_iron"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_iron"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_iron_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_iron_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_lapis"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_lapis"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_netherite"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_netherite"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_netherite_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_netherite_darker"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_quartz"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_quartz"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_redstone"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_redstone"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid/ascent_resin"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:trims/entity/humanoid_leggings/ascent_resin"
+    }
+  ]
+}

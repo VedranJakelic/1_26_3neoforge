@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:tree2",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 744710011,
+    "spacing": 12,
+    "separation": 4,
+
+    "type": "minecraft:random_spread"
+  }
+}

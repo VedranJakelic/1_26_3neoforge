@@ -1,0 +1,20 @@
+{
+  "has_skylight": false,
+  "has_ceiling": true,
+  "coordinate_scale": 0.125,
+  "min_y": -128,
+  "height": 416,
+  "logical_height": 416,
+  "infiniburn": "#minecraft:infiniburn_overworld",
+  "ambient_light": 0.0,
+  "monster_spawn_light_level": 0,
+  "monster_spawn_block_light_limit": 0,
+  "has_ender_dragon_fight": false,
+  "skybox": "none",
+  "has_fixed_time": true,
+  "attributes": {
+    "minecraft:gameplay/can_start_raid": false,
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:gameplay/piglins_zombify": true
+  }
+}

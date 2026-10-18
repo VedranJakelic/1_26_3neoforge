@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "shamaschizm:block/dungeon_bricks",
+    "side": "shamaschizm:block/dungeon_bricks",
+    "top": "shamaschizm:block/dungeon_bricks"
+  }
+}

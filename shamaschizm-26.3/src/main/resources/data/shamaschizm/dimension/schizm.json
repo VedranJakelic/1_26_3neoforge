@@ -1,0 +1,14 @@
+{
+  "type": "shamaschizm:schizm_type",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "layers": [
+        { "block": "shamaschizm:schizm_stone", "height": 416 }
+      ],
+      "biome": "minecraft:plains",
+      "features": false,
+      "structure_overrides": []
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "textures": {
+    "0": "shamaschizm:block/cuneiform1",
+    "1": "shamaschizm:block/cuneiform1_overlay",
+    "particle": "shamaschizm:block/cuneiform1"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16.0005
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            8,
+            4,
+            10
+          ],
+          "texture": "#0",
+          "cullface": "north"
+        },
+        "east": {
+          "uv": [
+            8,
+            2,
+            10,
+            4
+          ],
+          "texture": "#0",
+          "cullface": "east"
+        },
+        "south": {
+          "uv": [
+            4,
+            8,
+            6,
+            10
+          ],
+          "texture": "#0",
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [
+            8,
+            4,
+            10,
+            6
+          ],
+          "texture": "#0",
+          "cullface": "west"
+        },
+        "up": {
+          "uv": [
+            8,
+            10,
+            6,
+            8
+          ],
+          "texture": "#0",
+          "cullface": "up"
+        },
+        "down": {
+          "uv": [
+            10,
+            6,
+            8,
+            8
+          ],
+          "texture": "#0",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        -0.005
+      ],
+      "to": [
+        15.98,
+        16,
+        16.005
+      ],
+      "faces": {
+        "north": {
+          "texture": "#1",
+          "uv": [
+            0.0,
+            1.998332638599417,
+            1.998332638599417,
+            3.9991663192997082
+          ]
+        },
+        "east": {
+          "texture": "#1",
+          "uv": [
+            6.0,
+            1.998332638599417,
+            6.25,
+            3.9991663192997082
+          ]
+        },
+        "south": {
+          "texture": "#1",
+          "uv": [
+            4.0016673614005835,
+            7.9983326385994165,
+            6.0,
+            9.999166319299707
+          ]
+        }
+      }
+    }
+  ]
+}

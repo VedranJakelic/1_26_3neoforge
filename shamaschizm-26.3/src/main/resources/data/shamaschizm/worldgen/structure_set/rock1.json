@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:rock1",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 100056999,
+    "spacing": 16,
+    "separation": 8,
+
+    "type": "minecraft:random_spread"
+  }
+}

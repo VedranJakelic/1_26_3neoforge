@@ -1,0 +1,97 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": {
+    "plant": "shamaschizm:block/largeeyeblossom4",
+    "particle": "shamaschizm:block/largeeyeblossom4"
+  },
+  "elements": [
+    {
+      "from": [
+        -3,
+        0,
+        8
+      ],
+      "to": [
+        19,
+        16,
+        8
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            5.5,
+            4.0
+          ],
+          "texture": "#plant"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            4.0,
+            5.5,
+            8.0
+          ],
+          "texture": "#plant"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        0,
+        -3
+      ],
+      "to": [
+        8,
+        16,
+        19
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            5.5,
+            0.0,
+            11.0,
+            4.0
+          ],
+          "texture": "#plant"
+        },
+        "west": {
+          "uv": [
+            5.5,
+            4.0,
+            11.0,
+            8.0
+          ],
+          "texture": "#plant"
+        }
+      }
+    }
+  ]
+}

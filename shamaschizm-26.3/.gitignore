@@ -1,0 +1,54 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+
+# Files from Forge MDK
+forge*changelog.txt
+
+
+# Gradle caches and generated builds
+.gradle/
+build/
+out/
+bin/
+
+# Development game directories and worlds
+run/
+runs/
+runClient/
+runServer/
+
+# IDE-specific files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# Logs and crash reports
+logs/
+crash-reports/
+*.log
+
+# Local credentials
+.env
+.env.*

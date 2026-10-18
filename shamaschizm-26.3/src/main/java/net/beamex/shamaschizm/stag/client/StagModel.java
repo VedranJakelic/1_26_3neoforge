@@ -1,0 +1,65 @@
+package net.beamex.shamaschizm.stag.client;
+import net.beamex.shamaschizm.Shamaschizm;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.util.Mth;
+public final class StagModel extends EntityModel<StagRenderer.State>{
+ public static final ModelLayerLocation LAYER=new ModelLayerLocation(Shamaschizm.id("stag"),"main");
+ private final ModelPart normal,changed,normal_1,normal_17,normal_19,normal_21,normal_23,changed_1,changed_16,changed_18,changed_20,changed_22;
+ public StagModel(ModelPart root){super(root);normal=root.getChild("normal");changed=root.getChild("changed");normal_1=normal.getChild("normal_1");normal_17=normal.getChild("normal_17");normal_19=normal.getChild("normal_19");normal_21=normal.getChild("normal_21");normal_23=normal.getChild("normal_23");changed_1=changed.getChild("changed_1");changed_16=changed.getChild("changed_16");changed_18=changed.getChild("changed_18");changed_20=changed.getChild("changed_20");changed_22=changed.getChild("changed_22");}
+ public static LayerDefinition layer(){MeshDefinition mesh=new MeshDefinition();PartDefinition root=mesh.getRoot();
+ PartDefinition normal=root.addOrReplaceChild("normal",CubeListBuilder.create(),PartPose.ZERO);
+ PartDefinition changed=root.addOrReplaceChild("changed",CubeListBuilder.create(),PartPose.ZERO);
+PartDefinition normal_1=normal.addOrReplaceChild("normal_1",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,2.000000F,-5.000000F,-0.000000F,-0.000000F,0.000000F));
+PartDefinition normal_2=normal_1.addOrReplaceChild("normal_2",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+normal_2.addOrReplaceChild("normal_3",CubeListBuilder.create().texOffs(46,28).addBox(-3.500000F,-6.000000F,-9.000000F,7.000000F,6.000000F,16.000000F),PartPose.offsetAndRotation(0.000000F,-21.000000F,-5.000000F,1.570796F,-0.000000F,0.000000F));
+normal_2.addOrReplaceChild("normal_4",CubeListBuilder.create().texOffs(0,56).addBox(-2.500000F,-25.000000F,-14.000000F,5.000000F,3.000000F,5.000000F),PartPose.ZERO);
+PartDefinition normal_5=normal_1.addOrReplaceChild("normal_5",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+PartDefinition normal_6=normal_5.addOrReplaceChild("normal_6",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,0.000000F,0.000000F,-0.000000F,-0.000000F,0.000000F));
+normal_6.addOrReplaceChild("normal_7",CubeListBuilder.create().texOffs(52,0).addBox(0.500000F,-37.000000F,-9.000000F,9.000000F,14.000000F,8.000000F),PartPose.ZERO);
+PartDefinition normal_8=normal_5.addOrReplaceChild("normal_8",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,0.000000F,0.000000F,-0.000000F,-0.000000F,0.000000F));
+normal_8.addOrReplaceChild("normal_9",CubeListBuilder.create().texOffs(46,50).addBox(-9.500000F,-37.000000F,-9.000000F,9.000000F,14.000000F,8.000000F),PartPose.ZERO);
+PartDefinition normal_10=normal_1.addOrReplaceChild("normal_10",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+normal_10.addOrReplaceChild("normal_11",CubeListBuilder.create().texOffs(52,21).addBox(2.500000F,-27.000000F,-7.000000F,3.000000F,2.000000F,1.000000F),PartPose.ZERO);
+PartDefinition normal_12=normal_10.addOrReplaceChild("normal_12",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,0.000000F,0.000000F,-0.000000F,-0.000000F,0.000000F));
+normal_12.addOrReplaceChild("normal_13",CubeListBuilder.create().texOffs(52,24).addBox(-5.500000F,-27.000000F,-7.000000F,3.000000F,2.000000F,1.000000F),PartPose.ZERO);
+PartDefinition normal_14=normal.addOrReplaceChild("normal_14",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,24.000000F,0.000000F,-0.000000F,-0.000000F,0.000000F));
+normal_14.addOrReplaceChild("normal_15",CubeListBuilder.create().texOffs(0,0).addBox(-4.500000F,-20.000000F,-7.000000F,9.000000F,11.000000F,17.000000F),PartPose.ZERO);
+normal_14.addOrReplaceChild("normal_16",CubeListBuilder.create().texOffs(0,28).addBox(-5.500000F,-21.000000F,-9.000000F,11.000000F,16.000000F,12.000000F),PartPose.ZERO);
+PartDefinition normal_17=normal.addOrReplaceChild("normal_17",CubeListBuilder.create(),PartPose.offsetAndRotation(2.000000F,15.000000F,6.500000F,-0.000000F,-0.000000F,0.000000F));
+normal_17.addOrReplaceChild("normal_18",CubeListBuilder.create().texOffs(0,64).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,9.000000F,3.000000F),PartPose.ZERO);
+PartDefinition normal_19=normal.addOrReplaceChild("normal_19",CubeListBuilder.create(),PartPose.offsetAndRotation(-2.000000F,15.000000F,6.500000F,-0.000000F,-0.000000F,0.000000F));
+normal_19.addOrReplaceChild("normal_20",CubeListBuilder.create().texOffs(12,69).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,9.000000F,3.000000F),PartPose.ZERO);
+PartDefinition normal_21=normal.addOrReplaceChild("normal_21",CubeListBuilder.create(),PartPose.offsetAndRotation(2.000000F,14.000000F,-5.500000F,-0.000000F,-0.000000F,0.000000F));
+normal_21.addOrReplaceChild("normal_22",CubeListBuilder.create().texOffs(20,56).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,10.000000F,3.000000F),PartPose.ZERO);
+PartDefinition normal_23=normal.addOrReplaceChild("normal_23",CubeListBuilder.create(),PartPose.offsetAndRotation(-2.000000F,14.000000F,-5.500000F,-0.000000F,-0.000000F,0.000000F));
+normal_23.addOrReplaceChild("normal_24",CubeListBuilder.create().texOffs(32,56).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,10.000000F,3.000000F),PartPose.ZERO);
+PartDefinition changed_1=changed.addOrReplaceChild("changed_1",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,-10.000000F,-2.000000F,-0.000000F,-0.000000F,0.000000F));
+PartDefinition changed_2=changed_1.addOrReplaceChild("changed_2",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+changed_2.addOrReplaceChild("changed_3",CubeListBuilder.create().texOffs(46,50).addBox(-9.500000F,-37.000000F,-9.000000F,9.000000F,14.000000F,8.000000F),PartPose.ZERO);
+PartDefinition changed_4=changed_1.addOrReplaceChild("changed_4",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+changed_4.addOrReplaceChild("changed_5",CubeListBuilder.create().texOffs(52,0).addBox(0.500000F,-37.000000F,-9.000000F,9.000000F,14.000000F,8.000000F),PartPose.ZERO);
+PartDefinition changed_6=changed_1.addOrReplaceChild("changed_6",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+changed_6.addOrReplaceChild("changed_7",CubeListBuilder.create().texOffs(46,28).addBox(-3.500000F,-6.000000F,-9.000000F,7.000000F,6.000000F,16.000000F),PartPose.offsetAndRotation(0.000000F,-21.000000F,-5.000000F,1.570796F,-0.000000F,0.000000F));
+changed_6.addOrReplaceChild("changed_8",CubeListBuilder.create().texOffs(0,56).addBox(-2.500000F,-25.000000F,-14.000000F,5.000000F,3.000000F,5.000000F),PartPose.ZERO);
+PartDefinition changed_9=changed_1.addOrReplaceChild("changed_9",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,22.000000F,5.000000F,-0.000000F,-0.000000F,0.000000F));
+changed_9.addOrReplaceChild("changed_10",CubeListBuilder.create().texOffs(52,21).addBox(2.500000F,-27.000000F,-7.000000F,3.000000F,2.000000F,1.000000F),PartPose.ZERO);
+PartDefinition changed_11=changed_9.addOrReplaceChild("changed_11",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,0.000000F,0.000000F,-0.000000F,-0.000000F,0.000000F));
+changed_11.addOrReplaceChild("changed_12",CubeListBuilder.create().texOffs(52,24).addBox(-5.500000F,-27.000000F,-7.000000F,3.000000F,2.000000F,1.000000F),PartPose.ZERO);
+PartDefinition changed_13=changed.addOrReplaceChild("changed_13",CubeListBuilder.create(),PartPose.offsetAndRotation(0.000000F,11.000000F,2.000000F,-0.000000F,-0.000000F,0.000000F));
+changed_13.addOrReplaceChild("changed_14",CubeListBuilder.create().texOffs(0,0).addBox(-4.500000F,-8.000000F,-7.000000F,9.000000F,10.000000F,17.000000F),PartPose.offsetAndRotation(0.000000F,-13.000000F,-5.000000F,-1.570796F,-0.000000F,0.000000F));
+changed_13.addOrReplaceChild("changed_15",CubeListBuilder.create().texOffs(0,28).addBox(-5.500000F,-21.000000F,-9.000000F,11.000000F,16.000000F,12.000000F),PartPose.ZERO);
+PartDefinition changed_16=changed.addOrReplaceChild("changed_16",CubeListBuilder.create(),PartPose.offsetAndRotation(2.000000F,8.000000F,-0.500000F,-0.000000F,-0.000000F,0.000000F));
+changed_16.addOrReplaceChild("changed_17",CubeListBuilder.create().texOffs(0,64).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,16.000000F,3.000000F),PartPose.ZERO);
+PartDefinition changed_18=changed.addOrReplaceChild("changed_18",CubeListBuilder.create(),PartPose.offsetAndRotation(-2.000000F,8.000000F,-0.500000F,-0.000000F,-0.000000F,0.000000F));
+changed_18.addOrReplaceChild("changed_19",CubeListBuilder.create().texOffs(12,69).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,16.000000F,3.000000F),PartPose.ZERO);
+PartDefinition changed_20=changed.addOrReplaceChild("changed_20",CubeListBuilder.create(),PartPose.offsetAndRotation(6.000000F,-8.000000F,-4.500000F,-0.000000F,-0.000000F,0.000000F));
+changed_20.addOrReplaceChild("changed_21",CubeListBuilder.create().texOffs(20,56).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,27.000000F,3.000000F),PartPose.ZERO);
+PartDefinition changed_22=changed.addOrReplaceChild("changed_22",CubeListBuilder.create(),PartPose.offsetAndRotation(-6.000000F,-8.000000F,-3.500000F,-0.000000F,-0.000000F,0.000000F));
+changed_22.addOrReplaceChild("changed_23",CubeListBuilder.create().texOffs(32,56).addBox(-1.500000F,0.000000F,-1.500000F,3.000000F,27.000000F,3.000000F),PartPose.ZERO);
+ return LayerDefinition.create(mesh,128,128);}
+ @Override public void setupAnim(StagRenderer.State s){super.setupAnim(s);normal.visible=!s.changed;changed.visible=s.changed;
+ float swing=Mth.cos(s.walkAnimationPos*0.8F)*Math.min(s.walkAnimationSpeed,0.7F)*(s.changed?0F:1F);
+normal_1.yRot+=s.yRot*Mth.PI/180F;normal_1.xRot+=s.xRot*Mth.PI/180F;normal_17.xRot+=1*swing;normal_19.xRot+=-1*swing;normal_21.xRot+=-1*swing;normal_23.xRot+=1*swing;changed_1.yRot+=s.yRot*Mth.PI/180F;changed_1.xRot+=s.xRot*Mth.PI/180F;changed_16.xRot+=1*swing;changed_18.xRot+=-1*swing;changed_20.xRot+=-1*swing;changed_22.xRot+=1*swing;}
+}

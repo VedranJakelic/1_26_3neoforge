@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "#S#",
+    "#S#"
+  ],
+  "key": {
+    "#": "shamaschizm:dungeon_bricks",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "shamaschizm:dungeon_brick_fence",
+    "count": 3
+  }
+}

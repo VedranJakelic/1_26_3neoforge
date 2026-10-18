@@ -1,0 +1,215 @@
+{
+  "shaman1": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shaman1"
+      }
+    ]
+  },
+  "shaman2": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shaman2"
+      }
+    ]
+  },
+  "shamanhurt1": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shamanhurt1"
+      }
+    ]
+  },
+  "shamanhurt2": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shamanhurt2"
+      }
+    ]
+  },
+  "shamanhurt3": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shamanhurt3"
+      }
+    ]
+  },
+  "shamandeath": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shamandeath"
+      }
+    ]
+  },
+  "shamanchant1": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shamanchant1"
+      }
+    ]
+  },
+  "shamanchant2": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:shamanchant2"
+      }
+    ]
+  },
+  "shepard_tone": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/shepard_tone",
+        "stream": true
+      }
+    ]
+  },
+  "schizm_01": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/schizm_01",
+        "stream": true
+      }
+    ]
+  },
+  "schizm_02": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/schizm_02",
+        "stream": true
+      }
+    ]
+  },
+  "schizm_03": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/schizm_03",
+        "stream": true
+      }
+    ]
+  },
+  "schizm_04": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/schizm_04",
+        "stream": true
+      }
+    ]
+  },
+  "ambijansa3": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/ambijansa3",
+        "stream": true
+      }
+    ]
+  },
+  "poison_trap": {
+    "replace": false,
+    "sounds": [
+      {
+        "name": "shamaschizm:poison_trap"
+      }
+    ]
+  },
+  "meggate": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.megalithic_gate_open",
+    "sounds": [
+      {
+        "name": "shamaschizm:meggate"
+      }
+    ]
+  },
+  "roach_crawl": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.roach_crawl",
+    "sounds": [
+      {
+        "name": "shamaschizm:entity/roach/crawl1"
+      },
+      {
+        "name": "shamaschizm:entity/roach/crawl2"
+      },
+      {
+        "name": "shamaschizm:entity/roach/crawl3"
+      },
+      {
+        "name": "shamaschizm:entity/roach/crawl4"
+      },
+      {
+        "name": "shamaschizm:entity/roach/crawl5"
+      },
+      {
+        "name": "shamaschizm:entity/roach/crawl6"
+      }
+    ]
+  },
+  "frog_croak": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.frog_croak",
+    "sounds": [
+      {
+        "name": "shamaschizm:entity/frog_god/croak"
+      }
+    ]
+  },
+  "frog_1": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.frog_angered",
+    "sounds": [
+      {
+        "name": "shamaschizm:entity/frog_god/frog1"
+      }
+    ]
+  },
+  "frog_fire": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.frog_fire",
+    "sounds": [
+      {
+        "name": "shamaschizm:entity/frog_god/frogfire"
+      }
+    ]
+  },
+  "coffin_open": {
+    "replace": false,
+    "subtitle": "subtitles.shamaschizm.coffin_open",
+    "sounds": [
+      {
+        "name": "shamaschizm:coffinopen"
+      }
+    ]
+  },
+  "gallop_of_the_damned": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/gallop_of_the_damned",
+        "stream": true
+      }
+    ]
+  },
+  "saints_battle_cue": {
+    "sounds": [
+      {
+        "name": "shamaschizm:music/saints_battle_cue",
+        "stream": true
+      }
+    ]
+  },
+  "zombie_return_slab": {
+    "sounds": [
+      {
+        "name": "shamaschizm:zombie_return_slab",
+        "attenuation_distance": 16
+      }
+    ]
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "value": "minecraft:chests/trial_chambers/reward"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "shamaschizm:ancient_blueprint"
+        }
+      ],
+      "condition": {
+        "chance": 0.55,
+        "type": "minecraft:random_chance"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "shamaschizm:ascent_armor_trim_smithing_template"
+        }
+      ],
+      "condition": {
+        "chance": 0.15,
+        "type": "minecraft:random_chance"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:sharpness": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:protection": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:fire_protection": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:projectile_protection": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:unbreaking": 4
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:smite": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:bane_of_arthropods": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:efficiency": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:fire_aspect": 3
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:power": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:impaling": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:density": 6
+              },
+              "type": "minecraft:set_enchantments"
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "chance": 0.35,
+        "type": "minecraft:random_chance"
+      }
+    }
+  ],
+  "random_sequence": "shamaschizm:chests/schizm_vault"
+}

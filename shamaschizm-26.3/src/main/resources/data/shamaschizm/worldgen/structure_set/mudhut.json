@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:mudhut",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 242069210,
+    "spacing": 28,
+    "separation": 2,
+
+    "type": "minecraft:random_spread"
+  }
+}

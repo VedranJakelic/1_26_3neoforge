@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "shamaschizm:block/overtree_root",
+      "x": 180
+    },
+    "hanging=true": {
+      "model": "shamaschizm:block/overtree_root"
+    }
+  }
+}

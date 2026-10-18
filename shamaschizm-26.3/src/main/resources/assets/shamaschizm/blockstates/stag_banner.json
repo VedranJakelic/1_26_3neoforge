@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,row=0,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_0",
+      "y": 0
+    },
+    "facing=east,row=0,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_0",
+      "y": 90
+    },
+    "facing=south,row=0,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_0",
+      "y": 180
+    },
+    "facing=west,row=0,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_0",
+      "y": 270
+    },
+    "facing=north,row=0,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_north_part_0"
+    },
+    "facing=east,row=0,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_east_part_0"
+    },
+    "facing=south,row=0,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_south_part_0"
+    },
+    "facing=west,row=0,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_west_part_0"
+    },
+    "facing=north,row=1,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_1",
+      "y": 0
+    },
+    "facing=east,row=1,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_1",
+      "y": 90
+    },
+    "facing=south,row=1,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_1",
+      "y": 180
+    },
+    "facing=west,row=1,wall=false": {
+      "model": "shamaschizm:block/stag_banner/standing_part_1",
+      "y": 270
+    },
+    "facing=north,row=1,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_north_part_1"
+    },
+    "facing=east,row=1,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_east_part_1"
+    },
+    "facing=south,row=1,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_south_part_1"
+    },
+    "facing=west,row=1,wall=true": {
+      "model": "shamaschizm:block/stag_banner/wall_west_part_1"
+    }
+  }
+}

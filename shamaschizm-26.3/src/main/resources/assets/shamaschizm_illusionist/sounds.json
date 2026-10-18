@@ -1,0 +1,22 @@
+{
+  "greeting": {
+    "subtitle": "subtitles.shamaschizm.illusionist.greeting",
+    "sounds": [
+      {
+        "name": "shamaschizm_illusionist:greeting",
+        "stream": true,
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "choice": {
+    "subtitle": "subtitles.shamaschizm.illusionist.choice",
+    "sounds": [
+      {
+        "name": "shamaschizm_illusionist:choice",
+        "stream": true,
+        "attenuation_distance": 16
+      }
+    ]
+  }
+}

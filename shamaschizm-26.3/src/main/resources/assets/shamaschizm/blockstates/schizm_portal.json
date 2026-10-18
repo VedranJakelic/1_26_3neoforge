@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "axis=x": { "model": "shamaschizm:block/schizm_portal_x" },
+    "axis=z": { "model": "shamaschizm:block/schizm_portal_z" }
+  }
+}

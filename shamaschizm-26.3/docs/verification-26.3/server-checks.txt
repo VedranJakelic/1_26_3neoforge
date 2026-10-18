@@ -1,0 +1,70 @@
+PASS: new player starts with one soul
+PASS: initialization preserves a saved zero
+PASS: death clone preserves zero souls
+PASS: death clone preserves multiple souls
+PASS: player serialization and reconnect preserve souls
+PASS: old Forge save imports a legitimate zero soul balance
+PASS: current NeoForge balance takes precedence over legacy data
+PASS: zero souls blocks healing through the registered event
+PASS: healing resumes after regaining a soul
+PASS: shaman opts out of distance despawning
+PASS: shaman survives the peaceful-difficulty despawn check
+PASS: shaman remains persistent after save/load
+PASS: number-key result clicks cannot bypass soul trade logic
+PASS: soul trade pays exactly once and returns the book
+PASS: empty soul balance cannot repeat the trade
+PASS: full inventory blocks shift trading before charging souls
+PASS: invalid trade index cannot pay out
+PASS: blueprint trade is unavailable without tripping
+PASS: ordinary nausea does not unlock mushroom trades
+PASS: tripping unlocks the blueprint and consumes one soul
+PASS: nether star trade restores a soul without giving a soul item
+PASS: closing a currency trade never returns its display soul to inventory
+PASS: closing the menu releases the shaman for another player
+PASS: loaded smithing recipe accepts minecraft:diamond_chestplate
+PASS: upgrade preserves original identity, damage, name, and foreign data
+PASS: upgrade marks the output without mutating the input
+PASS: non-netherite equipment does not receive the ancient armor appearance
+PASS: upgrade survives item serialization
+PASS: smithing UI accepts template, equipment, and lapis
+PASS: smithing UI produces the marked output
+PASS: taking the smithing result consumes exactly one of each input
+PASS: empty smithing inputs cannot duplicate the result
+PASS: already upgraded equipment cannot consume another blueprint
+PASS: loaded smithing recipe accepts minecraft:diamond_pickaxe
+PASS: upgrade preserves original identity, damage, name, and foreign data
+PASS: upgrade marks the output without mutating the input
+PASS: non-netherite equipment does not receive the ancient armor appearance
+PASS: upgrade survives item serialization
+PASS: smithing UI accepts template, equipment, and lapis
+PASS: smithing UI produces the marked output
+PASS: taking the smithing result consumes exactly one of each input
+PASS: empty smithing inputs cannot duplicate the result
+PASS: already upgraded equipment cannot consume another blueprint
+PASS: loaded smithing recipe accepts verification_other_mod:armor
+PASS: upgrade preserves original identity, damage, name, and foreign data
+PASS: upgrade marks the output without mutating the input
+PASS: non-netherite equipment does not receive the ancient armor appearance
+PASS: upgrade survives item serialization
+PASS: smithing UI accepts template, equipment, and lapis
+PASS: smithing UI produces the marked output
+PASS: taking the smithing result consumes exactly one of each input
+PASS: empty smithing inputs cannot duplicate the result
+PASS: already upgraded equipment cannot consume another blueprint
+PASS: netherite armor keeps its mechanics and receives the ancient appearance
+PASS: ancient armor appearance survives item serialization
+PASS: anvil upgrade has a usable cost and consumes one material
+PASS: anvil upgrade has a usable cost and consumes one material
+PASS: anvil upgrade has a usable cost and consumes one material
+PASS: anvil upgrade has a usable cost and consumes one material
+PASS: equal-level book merges reach Fortune X
+PASS: anvil upgrade has a usable cost and consumes one material
+PASS: anvil upgrade has a usable cost and consumes one material
+PASS: upgraded gear accepts conflicting and normally inapplicable enchants without losing existing enchants
+PASS: unmarked equipment is left to vanilla anvil behavior
+PASS: Schizm loads with the eightfold destination scale
+PASS: entry records a safe arrival beside the scaled canonical portal position
+PASS: portal moves the player into the Schizm
+PASS: return uses the saved source portal
+PASS: re-entering a different portal block does not regenerate or overwrite the room
+PASS: portal links survive saved-data serialization

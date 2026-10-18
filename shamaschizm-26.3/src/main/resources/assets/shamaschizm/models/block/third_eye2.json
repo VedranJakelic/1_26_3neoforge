@@ -1,0 +1,7 @@
+{
+  "parent": "shamaschizm:block/third_eye1",
+  "textures": {
+    "1": "shamaschizm:block/third_eye2",
+    "particle": "shamaschizm:block/third_eye2"
+  }
+}

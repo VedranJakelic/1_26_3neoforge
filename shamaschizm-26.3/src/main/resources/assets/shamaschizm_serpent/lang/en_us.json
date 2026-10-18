@@ -1,0 +1,9 @@
+{
+  "entity.shamaschizm.illusionist": "Illusionist",
+  "item.shamaschizm.illusionist_spawn_egg": "Illusionist Spawn Egg",
+  "entity.shamaschizm.dark_eyes_illusionist": "Illusionist",
+  "item.shamaschizm.dark_eyes_illusionist_spawn_egg": "Illusionist Spawn Egg",
+  "subtitles.shamaschizm.illusionist.greeting": "Illusionist greets",
+  "subtitles.shamaschizm.illusionist.choice": "Illusionist responds",
+  "enchantment.shamaschizm.withering": "Withering"
+}

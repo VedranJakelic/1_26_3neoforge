@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:ruin2",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 130068129,
+    "spacing": 32,
+    "separation": 8,
+
+    "type": "minecraft:random_spread"
+  }
+}
