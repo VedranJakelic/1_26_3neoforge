@@ -9,7 +9,12 @@
     "SchizmTripWireMixin",
     "SaintMobGoalsAccessor",
     "SaintsCombatMovementMixin",
-    "LegacySoulDataMixin"
+    "LegacySoulDataMixin",
+    "PortalInteractionEyeMixin",
+    "PortalInteractionMenuMixin",
+    "PortalMiningAccessor",
+    "PortalSoundBroadcastMixin",
+    "PortalExplosionSoundMixin"
   ],
   "client": [
     "PortalSkyDarknessMixin",
@@ -27,7 +32,8 @@
     "AscentTrimTextureMixin",
     "AncientArmorTrimMeshMixin",
     "SlabFrameStateMixin",
-    "SlabFrameRendererMixin"
+    "SlabFrameRendererMixin",
+    "PortalInteractionInputMixin"
   ],
   "injectors": {
     "defaultRequire": 1
