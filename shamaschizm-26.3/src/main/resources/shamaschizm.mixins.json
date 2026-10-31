@@ -14,7 +14,10 @@
     "PortalInteractionMenuMixin",
     "PortalMiningAccessor",
     "PortalSoundBroadcastMixin",
-    "PortalExplosionSoundMixin"
+    "PortalExplosionSoundMixin",
+    "SchizmDeathMessageMixin",
+    "MaidenSpawnEggFacingMixin",
+    "MaidenSummonFacingMixin"
   ],
   "client": [
     "PortalSkyDarknessMixin",
@@ -33,7 +36,8 @@
     "AncientArmorTrimMeshMixin",
     "SlabFrameStateMixin",
     "SlabFrameRendererMixin",
-    "PortalInteractionInputMixin"
+    "PortalInteractionInputMixin",
+    "SchizmDeathScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

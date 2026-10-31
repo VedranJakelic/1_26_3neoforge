@@ -17,11 +17,11 @@ public abstract class TrippingSoundEngineMixin {
     @Shadow public abstract void refreshCategoryVolume(SoundSource source);
     @Inject(method = "calculateVolume(FLnet/minecraft/sounds/SoundSource;)F", at = @At("RETURN"), cancellable = true)
     private void shamaschizm$fade(float volume, SoundSource source, CallbackInfoReturnable<Float> cir) {
-        cir.setReturnValue(cir.getReturnValue() * ClientTrippyEffects.soundGain());
+        cir.setReturnValue(cir.getReturnValue() * (ClientTrippyEffects.soundGain() * net.beamex.shamaschizm.wisdom.client.WisdomLens.soundGain()));
     }
     @Inject(method = "tick", at = @At("HEAD"))
     private void shamaschizm$refresh(boolean paused, CallbackInfo ci) {
-        float gain = ClientTrippyEffects.soundGain();
+        float gain = (ClientTrippyEffects.soundGain() * net.beamex.shamaschizm.wisdom.client.WisdomLens.soundGain());
         if (Math.abs(gain-shamaschizm$previousGain) > 0.0001F) {
             shamaschizm$previousGain = gain;
             refreshCategoryVolume(SoundSource.MASTER);

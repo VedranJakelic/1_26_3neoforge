@@ -104,5 +104,17 @@
   "block.shamaschizm.large_eye_blossom_stalk": "Large Eye Blossom Stalk",
   "block.shamaschizm.overtree_root": "Overtree Root",
   "entity.shamaschizm.earthworm": "Earthworm",
-  "item.shamaschizm.earthworm_spawn_egg": "Earthworm Spawn Egg"
+  "item.shamaschizm.earthworm_spawn_egg": "Earthworm Spawn Egg",
+  "entity.shamaschizm.tainted_wisdom": "Tainted Wisdom",
+  "item.shamaschizm.corrupted_brain": "Corrupted Brain",
+  "item.shamaschizm.tainted_wisdom_spawn_egg": "Tainted Wisdom Spawn Egg",
+  "entity.shamaschizm.iron_maiden": "Iron Maiden",
+  "entity.shamaschizm.iron_maiden_bone": "Loose Bone",
+  "item.shamaschizm.iron_maiden_spawn_egg": "Iron Maiden Spawn Egg",
+  "subtitles.shamaschizm.iron_maiden_open": "Iron maiden creaks open",
+  "subtitles.shamaschizm.iron_maiden_clang": "Iron lids slam",
+  "entity.shamaschizm.jewelfish": "Jewelfish",
+  "item.shamaschizm.jewelfish_spawn_egg": "Jewelfish Spawn Egg",
+  "item.shamaschizm.jewelfish_bucket": "Bucket of Jewelfish",
+  "enchantment.shamaschizm.touch_of_ea_nasir": "Touch of Ea-nāṣir"
 }

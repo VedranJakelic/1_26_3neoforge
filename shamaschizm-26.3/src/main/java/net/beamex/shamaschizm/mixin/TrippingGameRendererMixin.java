@@ -19,6 +19,7 @@ public abstract class TrippingGameRendererMixin {
     private void shamaschizm$trip(CallbackInfo ci) {
         ClientTrippyEffects.render(mainRenderTarget, resourcePool);
         net.beamex.shamaschizm.client.CentipedeBiteBlur.render(mainRenderTarget, resourcePool);
+        net.beamex.shamaschizm.wisdom.client.WisdomLens.render(mainRenderTarget, resourcePool);
     }
     @Inject(method = "render", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/render/GuiRenderer;render()V", shift = At.Shift.AFTER))

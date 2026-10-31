@@ -211,5 +211,36 @@
         "attenuation_distance": 16
       }
     ]
+  },
+  "iron_maiden_open": {
+    "subtitle": "subtitles.shamaschizm.iron_maiden_open",
+    "sounds": [
+      {
+        "name": "shamaschizm:iron_maiden/open1iron"
+      },
+      {
+        "name": "shamaschizm:iron_maiden/open2iron"
+      }
+    ]
+  },
+  "iron_maiden_clang": {
+    "subtitle": "subtitles.shamaschizm.iron_maiden_clang",
+    "sounds": [
+      {
+        "name": "shamaschizm:iron_maiden/clang1"
+      },
+      {
+        "name": "shamaschizm:iron_maiden/clang2"
+      },
+      {
+        "name": "shamaschizm:iron_maiden/clang3"
+      },
+      {
+        "name": "shamaschizm:iron_maiden/clang4"
+      },
+      {
+        "name": "shamaschizm:iron_maiden/clang5"
+      }
+    ]
   }
 }

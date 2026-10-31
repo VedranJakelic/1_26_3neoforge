@@ -1,7 +1,7 @@
 package net.beamex.shamaschizm.earthworm.client;
 /** Textured source cubes only; helper and hitboks cubes are deliberately absent. */
-final class WormMesh {
- static final float[][] VERTICES={
+public final class WormMesh {
+ public static final float[][] VERTICES={
 {0.0F,0.03125F,0.0F,-0.03125F,0.0625F,0.1875F,0.0F,0.0F,-1.0F},
 {0.0F,-0.03125F,0.0F,-0.03125F,0.125F,0.1875F,0.0F,0.0F,-1.0F},
 {0.0F,-0.03125F,0.0625F,-0.03125F,0.125F,0.125F,0.0F,0.0F,-1.0F},

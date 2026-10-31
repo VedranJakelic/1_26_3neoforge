@@ -345,6 +345,7 @@ public final class SchizmDungeonGenerator {
             frontier.addAll(blocked);
             tryGarden(level, layout, frontier, prepared, random, reservationCenter);
         }
+        List<BoundingBox> olderRoomBoxes = new ArrayList<>();
         for (Placed room : layout) {
             var box = room.box;
             AABB swordBounds = new AABB(box.minX(), box.minY(), box.minZ(),
@@ -355,7 +356,8 @@ public final class SchizmDungeonGenerator {
                 existingSwords.add(sword.getUUID());
             }
             if (!room.room.template.placeInWorld(level, room.origin, room.origin,
-                    settings(room.rotation), level.getRandom(), QUIET_STRUCTURE_FLAGS)) {
+                    settings(room.rotation).addProcessor(new OlderRoomPriorityProcessor(olderRoomBoxes)),
+                    level.getRandom(), QUIET_STRUCTURE_FLAGS)) {
                 // Restore the custom terrain block if a planned placement fails.
                 // Restore all planned volumes if the template API reports failure.
                 for (Placed rollback : layout) {
@@ -367,6 +369,7 @@ public final class SchizmDungeonGenerator {
                 Shamaschizm.LOGGER.error("Dungeon placement failed for {} at {}", room.room.name, room.origin);
                 return new Result(false, 0);
             }
+            olderRoomBoxes.add(room.box);
             for (PlantedSwordEntity sword : level.getEntitiesOfClass(PlantedSwordEntity.class, swordBounds)) {
                 if (!existingSwords.contains(sword.getUUID())) sword.markGeneratedInRoom();
             }
@@ -378,7 +381,7 @@ public final class SchizmDungeonGenerator {
         // interrupted ejection state. Recreate each vault so every generated room
         // starts with empty player history and a valid Schizm-specific config.
         for (Placed room : layout) {
-            configureVaults(level, room);
+            configureVaults(level, room, layout);
         }
         for(Placed room:layout){
             if(room.room.name.equals("shamaschizm:arena2"))
@@ -391,8 +394,11 @@ public final class SchizmDungeonGenerator {
         // Do this last: aligned green/red markers can occupy the very same block.
         for (Placed room : layout) {
             for (BlockPos marker : room.room.markers) {
-                level.setBlock(room.origin.offset(rotate(marker, room.rotation)),
-                        Blocks.AIR.defaultBlockState(), QUIET_STRUCTURE_FLAGS);
+                BlockPos pos = room.origin.offset(rotate(marker, room.rotation));
+                // A newer marker must not carve a hole in an older wall or portal.
+                if (ownsPosition(layout, room, pos)) {
+                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), QUIET_STRUCTURE_FLAGS);
+                }
             }
         }
         for (Placed room : layout) net.beamex.shamaschizm.world.SchizmTrapUpdates.queueRoom(level,room.box);
@@ -1160,9 +1166,18 @@ public final class SchizmDungeonGenerator {
         }
     }
 
-    private static void configureVaults(ServerLevel level, Placed room) {
+    /** The first planned room containing a position owns it, including its air. */
+    private static boolean ownsPosition(List<Placed> layout, Placed room, BlockPos pos) {
+        for (Placed candidate : layout) {
+            if (candidate.box.isInside(pos)) return candidate == room;
+        }
+        return false;
+    }
+
+    private static void configureVaults(ServerLevel level, Placed room, List<Placed> layout) {
         for (BlockPos local : room.room.vaults) {
             BlockPos pos = room.origin.offset(rotate(local, room.rotation));
+            if (!ownsPosition(layout, room, pos)) continue;
             var state = level.getBlockState(pos);
             if (!state.is(Blocks.VAULT)) {
                 Shamaschizm.LOGGER.warn("Expected a vault from {} at {}, but found {}",

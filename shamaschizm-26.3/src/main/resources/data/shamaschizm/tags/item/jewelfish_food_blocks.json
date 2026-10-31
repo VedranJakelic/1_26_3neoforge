@@ -1,0 +1,118 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:diamond_block",
+    "minecraft:emerald_block",
+    "minecraft:lapis_block",
+    "minecraft:amethyst_block",
+    "minecraft:quartz_block",
+    "minecraft:iron_block",
+    "minecraft:gold_block",
+    "minecraft:copper_block",
+    "minecraft:netherite_block",
+    {
+      "id": "#c:storage_blocks/diamond",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/emerald",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/lapis",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/amethyst",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/quartz",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/iron",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/gold",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/copper",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/netherite",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/silver",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/tin",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/lead",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/nickel",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/aluminum",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/aluminium",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/platinum",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/uranium",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/zinc",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/bronze",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/brass",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/steel",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/ruby",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/sapphire",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/topaz",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/peridot",
+      "required": false
+    },
+    {
+      "id": "#c:storage_blocks/opal",
+      "required": false
+    }
+  ]
+}

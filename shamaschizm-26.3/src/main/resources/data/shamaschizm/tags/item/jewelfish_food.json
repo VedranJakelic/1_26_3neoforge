@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "#shamaschizm:jewelfish_jewels",
+    {
+      "id": "#c:ingots",
+      "required": false
+    },
+    "minecraft:iron_ingot",
+    "minecraft:gold_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:netherite_ingot"
+  ]
+}

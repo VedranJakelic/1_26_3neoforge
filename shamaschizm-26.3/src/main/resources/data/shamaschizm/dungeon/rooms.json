@@ -194,6 +194,9 @@
     { "template": "shamaschizm:room164", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room165", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room166", "tag": "normal", "weight": 1.0 },
-    { "template": "shamaschizm:room167", "tag": "moss", "weight": 1.0 }
+    { "template": "shamaschizm:room167", "tag": "moss", "weight": 1.0 },
+    { "template": "shamaschizm:room168", "tag": "normal", "weight": 1.3 },
+    { "template": "shamaschizm:room169", "tag": "normal", "weight": 1.5 },
+    { "template": "shamaschizm:room170", "tag": "grand", "weight": 1.5 }
   ]
 }

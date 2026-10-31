@@ -7,6 +7,7 @@ import java.util.WeakHashMap;
 import net.beamex.shamaschizm.world.Schizm;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -45,11 +46,15 @@ public final class SchizmNoiseTracker {
                     ? Math.max(radius, previous.radius()) : radius;
             long retainedExpiry = previous != null && previous.expiresAt() > now
                     ? Math.max(now + lifetimeTicks, previous.expiresAt()) : now + lifetimeTicks;
-            levelNoises.put(source, new Noise(source, position, retainedRadius, retainedExpiry));
+            levelNoises.put(source, new Noise(source, position, retainedRadius, retainedExpiry, now));
         }
     }
 
     public static @Nullable Noise loudestAudible(Zombie zombie) {
+        return loudestAudible((LivingEntity) zombie);
+    }
+
+    public static @Nullable Noise loudestAudible(LivingEntity zombie) {
         if (!(zombie.level() instanceof ServerLevel level) || !level.dimension().equals(Schizm.KEY)) return null;
         long now = level.getGameTime();
         Noise best = null;
@@ -72,7 +77,7 @@ public final class SchizmNoiseTracker {
         return best;
     }
 
-    public record Noise(UUID source, Vec3 position, double radius, long expiresAt) {
+    public record Noise(UUID source, Vec3 position, double radius, long expiresAt, long heardAt) {
         public @Nullable Player player(ServerLevel level) {
             return level.players().stream().filter(candidate -> candidate.getUUID().equals(source)).findFirst().orElse(null);
         }
