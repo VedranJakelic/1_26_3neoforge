@@ -1,17 +1,9 @@
 {
   "replace": false,
   "values": [
-    {
-      "id": "shamaschizm:agartha1",
-      "required": false
-    },
-    {
-      "id": "shamaschizm:agartha2",
-      "required": false
-    },
-    {
-      "id": "shamaschizm:agartha3",
-      "required": false
-    }
+    { "id": "shamaschizm:agartha1", "required": false },
+    { "id": "shamaschizm:agartha2", "required": false },
+    { "id": "shamaschizm:agartha3", "required": false },
+    { "id": "shamaschizm:agartha4", "required": false }
   ]
 }

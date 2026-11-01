@@ -3,6 +3,7 @@ package net.beamex.shamaschizm;
 import com.mojang.logging.LogUtils;
 import net.beamex.shamaschizm.effect.ModEffects;
 import net.beamex.shamaschizm.entity.ModEntities;
+import net.beamex.shamaschizm.ritual.RitualRegistry;
 import net.beamex.shamaschizm.worldgen.ShamaschizmStructures;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
@@ -20,6 +21,8 @@ public final class Shamaschizm {
         ModEffects.EFFECTS.register(modBus);
         ShamaschizmStructures.STRUCTURE_TYPES.register(modBus);
         ModSounds.SOUNDS.register(modBus);
+        RitualRegistry.ENTITY_TYPES.register(modBus);
+        RitualRegistry.ITEMS.register(modBus);
     }
 
     public static Identifier id(String path) {

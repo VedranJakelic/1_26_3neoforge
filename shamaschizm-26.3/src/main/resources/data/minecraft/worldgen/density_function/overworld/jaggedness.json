@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:mul",
+  "left": "minecraft:overworld_amplified/jaggedness",
+  "right": 0.6
+}
