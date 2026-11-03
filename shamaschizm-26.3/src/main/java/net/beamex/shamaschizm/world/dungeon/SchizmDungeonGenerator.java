@@ -11,11 +11,16 @@ import java.util.Random;
 import java.util.Set;
 import net.beamex.shamaschizm.Shamaschizm;
 import net.beamex.shamaschizm.garden.GardenData;
+import net.beamex.shamaschizm.illusionist.Illusionists;
+import net.beamex.shamaschizm.localportal.Doorway;
+import net.beamex.shamaschizm.localportal.DoorwayData;
+import net.beamex.shamaschizm.serpent.Serpents;
 import net.beamex.shamaschizm.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +55,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.beamex.shamaschizm.plantedsword.PlantedSwordEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 /** Server-thread-only, bounded marker-based dungeon planning and placement. */
@@ -96,8 +102,13 @@ public final class SchizmDungeonGenerator {
             java.util.Optional.empty());
 
     private record Exit(BlockPos local, Direction outward) {}
+    private record PortalMarker(BlockPos local, Direction towardLime, BlockPos lime) {}
     private record Room(DungeonRoomConfig.Entry entry, String name, StructureTemplate template, BlockPos entrance,
-                        List<Exit> exits, List<BlockPos> markers, List<BlockPos> vaults) {}
+                        List<Exit> exits, List<BlockPos> markers, List<BlockPos> vaults,
+                        List<BlockPos> serpentMarkers, List<BlockPos> illusionistMarkers,
+                        List<BlockPos> limeMarkers, List<PortalMarker> portals) {}
+    private record GeneratedPortal(Placed room, Doorway doorway) {}
+    private record PortalPair(Doorway first, Doorway second) {}
     private record Placed(Room room, BlockPos origin, Rotation rotation, BoundingBox box) {}
     private record OpenExit(Placed parent, BlockPos position, Direction outward) {}
     public record Result(boolean placed, int additionalRooms) {}
@@ -192,8 +203,31 @@ public final class SchizmDungeonGenerator {
         List<BlockPos> vaults = template.filterBlocks(
                         BlockPos.ZERO, settings(Rotation.NONE), Blocks.VAULT)
                 .stream().map(StructureTemplate.StructureBlockInfo::pos).toList();
+        List<BlockPos> serpentMarkers = woolMarkers(template, Blocks.WOOL.blue());
+        List<BlockPos> illusionistMarkers = woolMarkers(template, Blocks.WOOL.magenta());
+        List<BlockPos> limeMarkers = woolMarkers(template, Blocks.WOOL.lime());
+        Set<BlockPos> limePositions = new HashSet<>(limeMarkers);
+        List<PortalMarker> portals = new ArrayList<>();
+        for (BlockPos purple : woolMarkers(template, Blocks.WOOL.purple())) {
+            List<Direction> facing = new ArrayList<>();
+            for (Direction direction : List.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST)) {
+                if (limePositions.contains(purple.relative(direction))) facing.add(direction);
+            }
+            if (facing.size() != 1) {
+                throw new IllegalArgumentException(name + ": purple portal marker at " + purple
+                        + " requires exactly one horizontally adjacent lime wool block");
+            }
+            Direction direction = facing.getFirst();
+            portals.add(new PortalMarker(purple, direction, purple.relative(direction)));
+        }
         return new Room(entry, name, template, entrance, List.copyOf(exits),
-                List.copyOf(markers), vaults);
+                List.copyOf(markers), vaults, serpentMarkers, illusionistMarkers,
+                limeMarkers, List.copyOf(portals));
+    }
+
+    private static List<BlockPos> woolMarkers(StructureTemplate template, Block wool) {
+        return template.filterBlocks(BlockPos.ZERO, settings(Rotation.NONE), wool)
+                .stream().map(StructureTemplate.StructureBlockInfo::pos).toList();
     }
 
     private static Direction face(BlockPos p, int width, int depth, String name) {
@@ -401,6 +435,9 @@ public final class SchizmDungeonGenerator {
                 }
             }
         }
+        // Resolve coloured structure markers only after all rooms have been placed and
+        // their overlapping volumes assigned to the older room.
+        generateColouredMarkers(level, layout, random);
         for (Placed room : layout) net.beamex.shamaschizm.world.SchizmTrapUpdates.queueRoom(level,room.box);
         for (Placed room : layout) {
             if (!room.room.name.equals("shamaschizm:garden1") && !room.room.name.equals("shamaschizm:arena2")
@@ -1163,6 +1200,186 @@ public final class SchizmDungeonGenerator {
                     tried.remove(exit);
                 }
             }
+        }
+    }
+
+    /**
+     * Blue and magenta wool are entity anchors; purple wool is a doorway anchor,
+     * with adjacent lime wool indicating the front side of that doorway.
+     * Never modify a marker covered by an older room, including older-room air.
+     */
+    private static void generateColouredMarkers(ServerLevel level, List<Placed> layout, Random random) {
+        DoorwayData doorways = DoorwayData.get(level);
+        int availableSlots = Math.max(0, Doorway.MAX_DOORWAYS - doorways.all().size());
+        List<GeneratedPortal> available = new ArrayList<>();
+        List<PortalPair> pairs = new ArrayList<>();
+        int created = 0;
+
+        for (Placed room : layout) {
+            for (BlockPos local : room.room.serpentMarkers) {
+                BlockPos pos = room.origin.offset(rotate(local, room.rotation));
+                if (!ownsPosition(layout, room, pos) || !level.getBlockState(pos).is(Blocks.WOOL.blue())) continue;
+
+                // A marker embedded in a water-filled room should not leave an air bubble.
+                boolean water = false;
+                for (Direction adjacent : Direction.values()) {
+                    if (level.getFluidState(pos.relative(adjacent)).is(FluidTags.WATER)) {
+                        water = true;
+                        break;
+                    }
+                }
+                level.setBlock(pos, (water ? Blocks.WATER : Blocks.AIR).defaultBlockState(), QUIET_STRUCTURE_FLAGS);
+                var serpent = Serpents.TYPE.create(level, EntitySpawnReason.STRUCTURE);
+                if (serpent != null) {
+                    serpent.snapTo(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5,
+                            random.nextFloat() * 360.0F, 0.0F);
+                    if (!level.addFreshEntity(serpent)) {
+                        Shamaschizm.LOGGER.warn("Could not spawn a sea serpent at {}", pos);
+                    }
+                }
+            }
+
+            for (BlockPos local : room.room.illusionistMarkers) {
+                BlockPos pos = room.origin.offset(rotate(local, room.rotation));
+                if (!ownsPosition(layout, room, pos) || !level.getBlockState(pos).is(Blocks.WOOL.magenta())) continue;
+
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), QUIET_STRUCTURE_FLAGS);
+                var illusionist = Illusionists.TYPE.create(level, EntitySpawnReason.STRUCTURE);
+                if (illusionist != null) {
+                    BlockPos targetLocal = room.room.entrance != null
+                            ? room.room.entrance : room.room.exits.getFirst().local;
+                    BlockPos target = room.origin.offset(rotate(targetLocal, room.rotation));
+                    double dx = target.getX() - pos.getX(), dz = target.getZ() - pos.getZ();
+                    float yaw = dx == 0 && dz == 0
+                            ? room.rotation.rotate(Direction.NORTH).toYRot()
+                            : (float) Math.toDegrees(Math.atan2(-dx, dz));
+                    illusionist.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0F);
+                    illusionist.setYHeadRot(yaw);
+                    illusionist.setYBodyRot(yaw);
+                    if (!level.addFreshEntity(illusionist)) {
+                        Shamaschizm.LOGGER.warn("Could not spawn an illusionist at {}", pos);
+                    }
+                }
+            }
+
+            // Record portal anchors before linking; room rotation also rotates
+            // the lime-facing direction.
+            for (PortalMarker marker : room.room.portals) {
+                BlockPos pos = room.origin.offset(rotate(marker.local, room.rotation));
+                BlockPos lime = room.origin.offset(rotate(marker.lime, room.rotation));
+                if (!ownsPosition(layout, room, pos)
+                        || !level.getBlockState(pos).is(Blocks.WOOL.purple())) continue;
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), QUIET_STRUCTURE_FLAGS);
+                if (!ownsPosition(layout, room, lime)
+                        || !level.getBlockState(lime).is(Blocks.WOOL.lime())) {
+                    Shamaschizm.LOGGER.warn("Local doorway at {} lost its lime facing marker to an older room", pos);
+                    continue;
+                }
+                if (created >= availableSlots) {
+                    Shamaschizm.LOGGER.warn("Local doorway limit reached; skipped marker at {}", pos);
+                    continue;
+                }
+                if (!level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty()) {
+                    Shamaschizm.LOGGER.warn("Local doorway at {} needs a clear two-block-high opening", pos);
+                    continue;
+                }
+
+                String name = "dng_" + Long.toUnsignedString(pos.asLong(), 36);
+                if (doorways.get(name) != null) {
+                    Shamaschizm.LOGGER.warn("Local doorway name {} already exists; not overwriting it", name);
+                    continue;
+                }
+                Direction worldFace = room.rotation.rotate(marker.towardLime);
+                Doorway doorway = new Doorway(name, Vec3.atBottomCenterOf(pos),
+                        Doorway.Facing.valueOf(worldFace.name()), 1.0, 2.0, "", false);
+                doorways.put(doorway);
+                available.add(new GeneratedPortal(room, doorway));
+                created++;
+            }
+            // Lime is a construction marker, not a permanent part of the portal.
+            for (BlockPos local : room.room.limeMarkers) {
+                BlockPos pos = room.origin.offset(rotate(local, room.rotation));
+                if (ownsPosition(layout, room, pos) && level.getBlockState(pos).is(Blocks.WOOL.lime())) {
+                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), QUIET_STRUCTURE_FLAGS);
+                }
+            }
+
+        }
+
+        // Give rooms containing a single portal first choice of the closest
+        // other available portal, even if that portal belongs to a multi-portal room.
+        // Otherwise a lone portal could remain disabled merely because the other
+        // room's endpoints were paired locally first.
+        List<GeneratedPortal> singletons = available.stream()
+                .filter(portal -> available.stream().filter(other -> other.room == portal.room).count() == 1)
+                .toList();
+        for (GeneratedPortal first : singletons) {
+            if (!available.contains(first)) continue;
+            GeneratedPortal nearest = null;
+            double distance = Double.POSITIVE_INFINITY;
+            for (GeneratedPortal candidate : available) {
+                if (candidate.room == first.room) continue;
+                double d = first.doorway.origin().distanceToSqr(candidate.doorway.origin());
+                if (d >= 4.0 && d < distance) {
+                    distance = d;
+                    nearest = candidate;
+                }
+            }
+            if (nearest != null) {
+                available.remove(first);
+                available.remove(nearest);
+                pairs.add(new PortalPair(first.doorway, nearest.doorway));
+            }
+        }
+
+        // Random reciprocal pairs within each room, using only free endpoints.
+        for (Placed room : layout) {
+            List<GeneratedPortal> local = new ArrayList<>();
+            for (GeneratedPortal portal : available) if (portal.room == room) local.add(portal);
+            Collections.shuffle(local, random);
+            while (!local.isEmpty()) {
+                GeneratedPortal first = local.removeLast();
+                List<GeneratedPortal> possible = local.stream()
+                        .filter(other -> first.doorway.origin().distanceToSqr(other.doorway.origin()) >= 4.0)
+                        .toList();
+                if (possible.isEmpty()) continue;
+                GeneratedPortal second = possible.get(random.nextInt(possible.size()));
+                local.remove(second);
+                available.remove(first);
+                available.remove(second);
+                pairs.add(new PortalPair(first.doorway, second.doorway));
+            }
+        }
+
+        // Finally connect unmatched endpoints to the nearest unmatched portal
+        // in another room. Reciprocal links cannot consume an endpoint twice.
+        while (!available.isEmpty()) {
+            GeneratedPortal first = available.removeFirst();
+            GeneratedPortal closest = null;
+            double bestDistance = Double.POSITIVE_INFINITY;
+            for (GeneratedPortal candidate : available) {
+                if (candidate.room == first.room) continue;
+                double distance = first.doorway.origin().distanceToSqr(candidate.doorway.origin());
+                if (distance >= 4.0 && distance < bestDistance) {
+                    bestDistance = distance;
+                    closest = candidate;
+                }
+            }
+            if (closest == null) {
+                Shamaschizm.LOGGER.warn("Unpaired generated doorway {}: no available second endpoint",
+                        first.doorway.name());
+                continue;
+            }
+            available.remove(closest);
+            pairs.add(new PortalPair(first.doorway, closest.doorway));
+        }
+        for (PortalPair pair : pairs) {
+            doorways.link(pair.first.name(), pair.second.name());
+            doorways.enable(pair.first.name(), true);
+        }
+        if (created > 0) {
+            Shamaschizm.LOGGER.info("Created {} dungeon local doorways, {} active pairs",
+                    created, pairs.size());
         }
     }
 

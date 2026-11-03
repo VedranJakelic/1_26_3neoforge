@@ -1,11 +1,18 @@
 {
   "variants": {
-    "hanging=false": {
+    "hanging=false,has_dew=false": {
       "model": "shamaschizm:block/overtree_root",
       "x": 180
     },
-    "hanging=true": {
+    "hanging=false,has_dew=true": {
+      "model": "shamaschizm:block/overtree_dew",
+      "x": 180
+    },
+    "hanging=true,has_dew=false": {
       "model": "shamaschizm:block/overtree_root"
+    },
+    "hanging=true,has_dew=true": {
+      "model": "shamaschizm:block/overtree_dew"
     }
   }
 }

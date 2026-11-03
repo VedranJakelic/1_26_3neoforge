@@ -10,6 +10,24 @@
         }
       ],
       "rolls": 1
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "shamaschizm:overtree_root",
+          "properties": {
+            "has_dew": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "shamaschizm:dew_of_the_overtree"
+        }
+      ]
     }
   ],
   "random_sequence": "minecraft:blocks/hanging_roots"

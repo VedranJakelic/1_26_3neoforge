@@ -13,7 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 public final class DecorativePlants {
  public static LargeEyeBlossomBlock BLOSSOM,STALK;
  public static OvertreeRootBlock ROOT;
- public static Item BLOSSOM_ITEM,STALK_ITEM,ROOT_ITEM;
+ public static Item BLOSSOM_ITEM,STALK_ITEM,ROOT_ITEM,DEW_ITEM;
  @SubscribeEvent public static void register(RegisterEvent event){
   event.register(Registries.BLOCK,h->{
    BLOSSOM=new LargeEyeBlossomBlock(flower("large_eye_blossom").randomTicks()
@@ -21,12 +21,16 @@ public final class DecorativePlants {
    STALK=new LargeEyeBlossomBlock(flower("large_eye_blossom_stalk"),true);
    ROOT=new OvertreeRootBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.HANGING_ROOTS)
     .setId(ResourceKey.create(Registries.BLOCK,Shamaschizm.id("overtree_root")))
+    .lightLevel(s->s.getValue(OvertreeRootBlock.HAS_DEW)?5:0)
     .overrideLootTable(java.util.Optional.of(ResourceKey.create(Registries.LOOT_TABLE,Shamaschizm.id("blocks/overtree_root")))));
    h.register(Shamaschizm.id("large_eye_blossom"),BLOSSOM);h.register(Shamaschizm.id("large_eye_blossom_stalk"),STALK);h.register(Shamaschizm.id("overtree_root"),ROOT);
   });
   event.register(Registries.ITEM,h->{
    BLOSSOM_ITEM=item("large_eye_blossom",BLOSSOM);STALK_ITEM=item("large_eye_blossom_stalk",STALK);ROOT_ITEM=item("overtree_root",ROOT);
    h.register(Shamaschizm.id("large_eye_blossom"),BLOSSOM_ITEM);h.register(Shamaschizm.id("large_eye_blossom_stalk"),STALK_ITEM);h.register(Shamaschizm.id("overtree_root"),ROOT_ITEM);
+   DEW_ITEM=new net.beamex.shamaschizm.item.custom.DewOfTheOvertreeItem(new Item.Properties()
+    .setId(ResourceKey.create(Registries.ITEM,Shamaschizm.id("dew_of_the_overtree"))));
+   h.register(Shamaschizm.id("dew_of_the_overtree"),DEW_ITEM);
   });
  }
  private static BlockBehaviour.Properties flower(String id){return BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY)
@@ -34,5 +38,6 @@ public final class DecorativePlants {
  private static Item item(String id,Block b){return new BlockItem(b,new Item.Properties().setId(ResourceKey.create(Registries.ITEM,Shamaschizm.id(id))).useBlockDescriptionPrefix());}
  @SubscribeEvent public static void tab(BuildCreativeModeTabContentsEvent e){
   if(e.getTabKey()==ResourceKey.create(Registries.CREATIVE_MODE_TAB,Identifier.withDefaultNamespace("natural_blocks"))){e.accept(BLOSSOM_ITEM);e.accept(STALK_ITEM);e.accept(ROOT_ITEM);}
+  if(e.getTabKey()==CreativeModeTabs.FOOD_AND_DRINKS)e.accept(DEW_ITEM);
  }
 }

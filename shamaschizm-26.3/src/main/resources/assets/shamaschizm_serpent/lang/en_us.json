@@ -1,9 +1,8 @@
 {
-  "entity.shamaschizm.illusionist": "Illusionist",
-  "item.shamaschizm.illusionist_spawn_egg": "Illusionist Spawn Egg",
-  "entity.shamaschizm.dark_eyes_illusionist": "Illusionist",
-  "item.shamaschizm.dark_eyes_illusionist_spawn_egg": "Illusionist Spawn Egg",
-  "subtitles.shamaschizm.illusionist.greeting": "Illusionist greets",
-  "subtitles.shamaschizm.illusionist.choice": "Illusionist responds",
-  "enchantment.shamaschizm.withering": "Withering"
+  "entity.shamaschizm.sea_serpent": "Sea Serpent",
+  "item.shamaschizm.sea_serpent_spawn_egg": "Sea Serpent Spawn Egg",
+  "subtitles.shamaschizm.serpent.grab": "Sea serpent grabs",
+  "subtitles.shamaschizm.serpent.idle_1": "Sea serpent calls",
+  "subtitles.shamaschizm.serpent.idle_2": "Sea serpent calls",
+  "subtitles.shamaschizm.serpent.idle_3": "Sea serpent calls"
 }

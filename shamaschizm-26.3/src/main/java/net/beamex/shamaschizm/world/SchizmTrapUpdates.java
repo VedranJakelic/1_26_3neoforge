@@ -35,6 +35,27 @@ public final class SchizmTrapUpdates {
                 .putIfAbsent(new ChunkPos(x,z),level.getGameTime()+20);
     }
     public static void queueRoom(ServerLevel level,BoundingBox box) {
+        // Called by the dungeon generator after its quiet structure placement.
+        // Stable per-position roll keeps the probability at exactly 4%, even
+        // where room boxes overlap or the queue is scheduled more than once.
+        var root = net.beamex.shamaschizm.plants.DecorativePlants.ROOT;
+        if (root != null) {
+            for (BlockPos p : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(),
+                    box.maxX(), box.maxY(), box.maxZ())) {
+                BlockState state = level.getBlockState(p);
+                if (!state.is(root) || state.getValue(net.beamex.shamaschizm.plants.OvertreeRootBlock.HAS_DEW)) continue;
+                long mixed = p.asLong() ^ level.getSeed() ^ 0x6A09E667F3BCC909L;
+                mixed ^= mixed >>> 30;
+                mixed *= -4658895280553007687L;
+                mixed ^= mixed >>> 27;
+                mixed *= -7723592293110705685L;
+                mixed ^= mixed >>> 31;
+                if (Long.remainderUnsigned(mixed, 100L) < 4L) {
+                    level.setBlock(p, state.setValue(
+                            net.beamex.shamaschizm.plants.OvertreeRootBlock.HAS_DEW, true), QUIET);
+                }
+            }
+        }
         for(int x=box.minX()>>4;x<=box.maxX()>>4;x++)
             for(int z=box.minZ()>>4;z<=box.maxZ()>>4;z++)queue(level,x,z);
     }

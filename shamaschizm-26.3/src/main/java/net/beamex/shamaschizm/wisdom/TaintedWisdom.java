@@ -73,9 +73,31 @@ public final class TaintedWisdom extends Monster implements VibrationSystem {
     @Override public void travel(Vec3 input) {} // Server owns collision-aware float movement.
     @Override public boolean causeFallDamage(double distance, float multiplier, DamageSource source) { return false; }
     @Override public int getMaxSpawnClusterSize() { return 1; }
+    // Explicitly protect name-tagged Wisdoms from both distance despawning and
+    // the regular monster despawn checks (including peaceful difficulty).
+    @Override public boolean removeWhenFarAway(double distance) {
+        return !hasCustomName() && super.removeWhenFarAway(distance);
+    }
+    @Override public void checkDespawn() {
+        if (hasCustomName()) {
+            setPersistenceRequired();
+            return;
+        }
+        super.checkDespawn();
+    }
     @Override public void tick() {
         super.tick();
         if (!(level() instanceof ServerLevel server)) return;
+        if (hasCustomName()) {
+            setPersistenceRequired();
+            // Resistance VI has amplifier 5 (effect levels start at zero).
+            // Refresh once per second, keeping the benefits active indefinitely
+            // without resending two effect updates on every single tick.
+            if ("Boltzmann".equals(getCustomName().getString()) && tickCount % 20 == 1) {
+                addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 60, 0, true, false));
+                addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 60, 3, true, false));
+            }
+        }
         if (!isAlive()) {
             // deathTime advances only after a real, non-cancelled death.
             if (deathTime > 0 && !wormsReleased()) releaseWorms(server);
