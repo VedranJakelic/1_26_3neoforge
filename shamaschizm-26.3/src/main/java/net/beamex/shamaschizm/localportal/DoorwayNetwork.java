@@ -45,7 +45,7 @@ public final class DoorwayNetwork {
         };
         public Type<State> type() { return TYPE; }
     }
-    /** Sent immediately after the vanilla position/rotation teleport packet. */
+    /** Sent immediately before the vanilla position/rotation teleport packet. */
     public record Turn(float yawDelta) implements CustomPacketPayload {
         public static final Type<Turn> TYPE = new Type<>(Shamaschizm.id("local_doorway_turn"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Turn> CODEC = new StreamCodec<>() {

@@ -108,23 +108,28 @@ public final class LivingSmoke extends Monster {
 
     private void clientSmoke() {
         if (!isAlive()) return;
-        // Smoke occupies the invisible body: wide at the mask, tapering toward the tail.
+        // A broad, overlapping cloud behind the mask, tapering only near the tail.
         Vec3 facing = forward();
         Vec3 side = new Vec3(Math.cos(Math.toRadians(getYRot())), 0,
                 Math.sin(Math.toRadians(getYRot())));
         Vec3 up = facing.cross(side).normalize();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 16; i++) {
+            // Three peripheral wisps spill across the face without filling its centre.
+            boolean faceWisp = i >= 13;
             double t = random.nextDouble();
             double angle = random.nextDouble() * Math.PI * 2;
-            double radius = (.12 + .58 * (1 - t)) * Math.sqrt(random.nextDouble());
-            Vec3 point = position().subtract(facing.scale(.2 + 1.6 * t))
+            double radius = faceWisp
+                    ? .55 + random.nextDouble() * .30
+                    : (.18 + .78 * Math.pow(1 - t, .65)) * Math.sqrt(random.nextDouble());
+            double depth = faceWisp ? -.16 + random.nextDouble() * .30 : .08 + 1.8 * t;
+            Vec3 point = position().subtract(facing.scale(depth))
                     .add(side.scale(Math.cos(angle) * radius))
-                    .add(up.scale(Math.sin(angle) * radius * .8))
+                    .add(up.scale(Math.sin(angle) * radius * .95))
                     .add(0, .08, 0);
             double dx = (random.nextDouble() - .5) * .005;
             double dy = .002 + random.nextDouble() * .007;
             double dz = (random.nextDouble() - .5) * .005;
-            level().addParticle(i % 3 == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE,
+            level().addParticle(!faceWisp && i % 3 != 2 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE,
                     point.x, point.y, point.z, dx, dy, dz);
         }
     }

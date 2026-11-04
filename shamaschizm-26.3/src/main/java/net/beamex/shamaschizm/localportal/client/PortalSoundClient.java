@@ -59,7 +59,9 @@ public final class PortalSoundClient {
                 if(door.name().equals(packet.target()))target=door;
             }
             if(packet.entityId()>=0){
-                var moving=PortalEntityScene.soundPosition(packet.source(),packet.entityId(),packet.entityUuid());
+                var entity=mc.level.getEntity(packet.entityId());
+                var moving=entity!=null&&entity.getUUID().equals(packet.entityUuid())
+                        ? entity.position() : PortalEntityScene.soundPosition(packet.source(),packet.entityId(),packet.entityUuid());
                 if(moving!=null)lastPosition=moving;
             }
             var route=source==null||target==null?null:PortalSoundPath.find(source,target,mc.player.getEyePosition(),lastPosition,packet.range());
@@ -72,7 +74,9 @@ public final class PortalSoundClient {
             }
             if(route==null){
                 if(initial){stop();return;}
-                volume*=.5f;if(volume<.001f)stop();return;
+                // Keep the same playback cursor during a brief metadata/range gap.
+                // The sound manager still releases the channel when its clip ends.
+                volume*=.5f;return;
             }
             Vec3 point=route.aperture();x=point.x;y=point.y;z=point.z;
             float desired=PortalSoundPath.gain(packet.volume(),route.distance(),packet.range());

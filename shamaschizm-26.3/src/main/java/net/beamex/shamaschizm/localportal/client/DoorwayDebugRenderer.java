@@ -25,7 +25,8 @@ public final class DoorwayDebugRenderer {
     private DoorwayDebugRenderer() {}
 
     public static List<Doorway> doorways() {
-        return visible;
+        var pending = DoorwayNetwork.PENDING.get();
+        return pending != null ? pending : visible;
     }
 
     @SubscribeEvent

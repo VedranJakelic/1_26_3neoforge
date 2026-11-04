@@ -35,8 +35,7 @@ public final class DoorwayTraversal {
         Track track = TRACKS.computeIfAbsent(player, p -> new Track(p.position()));
         Vec3 current = player.position();
         if (track.revision != data.revision() || player.tickCount % 20 == 0) {
-            PacketDistributor.sendToPlayer(player, new DoorwayNetwork.State(data.all().stream()
-                    .filter(d -> d.origin().distanceToSqr(current) < 48 * 48).toList()));
+            PacketDistributor.sendToPlayer(player, new DoorwayNetwork.State(nearbyWithPartners(data, current)));
             track.revision = data.revision();
         }
         Vec3 previous = track.previous;
@@ -73,8 +72,9 @@ public final class DoorwayTraversal {
             float yaw = (float)Math.toDegrees(Math.atan2(-heading.x, heading.z));
             float yawDelta = yaw - player.getYRot();
             double fall = player.fallDistance;
-            player.teleportTo(level, destination.x, destination.y, destination.z, Set.of(), yaw, player.getXRot(), true);
             PacketDistributor.sendToPlayer(player, new DoorwayNetwork.Turn(yawDelta));
+            player.teleportTo(level, destination.x, destination.y, destination.z, Set.of(), yaw, player.getXRot(), true);
+            PacketDistributor.sendToPlayer(player, new DoorwayNetwork.State(nearbyWithPartners(data, destination)));
             player.setDeltaMovement(velocity);
             player.fallDistance = fall;
             player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(player));
@@ -82,6 +82,17 @@ public final class DoorwayTraversal {
             return;
         }
     }
+    private static List<Doorway> nearbyWithPartners(DoorwayData data, Vec3 position) {
+        var result = new LinkedHashMap<String, Doorway>();
+        for (var door : data.all()) {
+            if (door.origin().distanceToSqr(position) >= 48 * 48) continue;
+            result.put(door.name(), door);
+            var partner = data.get(door.target());
+            if (partner != null) result.put(partner.name(), partner);
+        }
+        return List.copyOf(result.values());
+    }
+
     static Vec3 findExit(Entity player, Doorway source, Doorway target,
                                  Vec3 previous, Vec3 current) {
         AABB bounds = traversalBounds(player);

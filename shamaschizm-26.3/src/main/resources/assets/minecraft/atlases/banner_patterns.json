@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "shamaschizm:entity/banner/tattered_base",
+      "sprite": "shamaschizm:entity/banner/tattered_base"
+    }
+  ]
+}

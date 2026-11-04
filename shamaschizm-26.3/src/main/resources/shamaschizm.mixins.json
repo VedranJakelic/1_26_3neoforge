@@ -37,7 +37,11 @@
     "SlabFrameStateMixin",
     "SlabFrameRendererMixin",
     "PortalInteractionInputMixin",
-    "SchizmDeathScreenMixin"
+    "SchizmDeathScreenMixin",
+    "PortalPlayerContinuityMixin",
+    "PortalSoundContinuityMixin",
+    "TatteredBannerRenderStateMixin",
+    "TatteredBannerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

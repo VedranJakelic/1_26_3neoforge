@@ -65,13 +65,13 @@ public final class SchizmDungeonGenerator {
             | Block.UPDATE_KNOWN_SHAPE
             | Block.UPDATE_SKIP_SHAPE_UPDATE_ON_WIRE
             | Block.UPDATE_SKIP_ON_PLACE;
-    public static final int ADDITIONAL_ROOMS = 50;
+    public static final int ADDITIONAL_ROOMS = 60;
     // Does not include the spawn room, which already requires an exit.
-    public static final int FIRST_ROOMS_WITH_EXITS = 10;
+    public static final int FIRST_ROOMS_WITH_EXITS = 15;
     public static final int FAILED_SEARCHES_PER_EXIT = 5;
     public static final int DEAD_END_ATTEMPTS_PER_EXIT = 18;
     public static final int MAX_LOOP_ROOMS = 15;
-    public static final int MAX_SUCCESSFUL_LOOPS = 5;
+    public static final int MAX_SUCCESSFUL_LOOPS = 7;
     public static final int MAX_LOOP_PAIR_ATTEMPTS = 64;
     public static final int MAX_LOOP_SEARCH_NODES_PER_PAIR = 5_000;
     public static final int MAX_LOOP_BEAM_WIDTH = 256;
