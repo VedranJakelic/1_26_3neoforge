@@ -41,7 +41,8 @@
     "PortalPlayerContinuityMixin",
     "PortalSoundContinuityMixin",
     "TatteredBannerRenderStateMixin",
-    "TatteredBannerRendererMixin"
+    "TatteredBannerRendererMixin",
+    "SurfaceEyeProjectionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

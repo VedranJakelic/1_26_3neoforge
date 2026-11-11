@@ -51,7 +51,7 @@ public final class ShamanTradeMenu extends MerchantMenu {
             return SoulData.getSouls(player) >= a.getCount() && matchesSecond(offer);
         }
         return offer.satisfiedBy(getSlot(0).getItem(), getSlot(1).getItem())
-                && SoulData.getSouls(player) < Integer.MAX_VALUE;
+                && SoulData.getSouls(player) <= Integer.MAX_VALUE - offer.getResult().getCount();
     }
     private boolean matchesSecond(MerchantOffer offer) {
         ItemStack b = offer.getCostB();
@@ -198,7 +198,10 @@ public final class ShamanTradeMenu extends MerchantMenu {
         return false;
     }
     @Override public void removed(Player who) {
+        if (closed) return;
         closed = true;
+        if (merchant instanceof net.beamex.shamaschizm.entity.custom.ShamanEntity shaman)
+            shaman.closeWitnessBargain(player);
         updating = true;
         clearGhosts();
         super.removed(who);

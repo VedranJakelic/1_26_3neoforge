@@ -1,6 +1,7 @@
 package net.beamex.shamaschizm.command;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.beamex.shamaschizm.Shamaschizm;
 import net.beamex.shamaschizm.experimental.ExperimentalSettings;
 import net.beamex.shamaschizm.world.dungeon.SchizmDungeonGenerator;
@@ -20,11 +21,17 @@ public final class ShamaschizmCommands {
                 .then(Commands.literal("help").executes(c->help(c.getSource())))
                 .then(Commands.literal("experimental").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(c->status(c.getSource()))
+                        .then(Commands.literal("rooms").executes(c->status(c.getSource()))
+                                .then(Commands.argument("count",IntegerArgumentType.integer(ExperimentalSettings.MIN_ROOMS, ExperimentalSettings.MAX_ROOMS))
+                                        .executes(c->setRooms(c.getSource(),IntegerArgumentType.getInteger(c,"count")))))
+                        .then(Commands.literal("deep").executes(c->status(c.getSource()))
+                                .then(Commands.argument("enabled",BoolArgumentType.bool())
+                                        .executes(c->setDeep(c.getSource(),BoolArgumentType.getBool(c,"enabled")))))
                         .then(Commands.literal("arena2").executes(c->status(c.getSource()))
                                 .then(Commands.argument("enabled",BoolArgumentType.bool()).executes(c->set(c.getSource(),BoolArgumentType.getBool(c,"enabled")))))));
     }
     private static int help(CommandSourceStack source){
-        source.sendSuccess(()->Component.literal("Shamaschizm commands:\n/shamaschizm help - Show this command overview.\n/soul [get] [player] - Show your or an online player's soul balance.\n/soul add <player> <amount> - Add souls (operator).\n/soul remove <player> <amount> - Remove souls, stopping at zero (operator).\n/soul set <player> <amount> - Set a soul balance (operator).\n/checkgarden - Check whether your current Schizm dungeon has a recorded garden.\n/shamaschizm experimental - Show experimental settings (operator).\n/shamaschizm experimental arena2 <true|false> - Enable/disable entrance2 -> arena2 -> garden1 for newly generated dungeons (operator). Existing dungeons are unchanged."),false);
+        source.sendSuccess(()->Component.literal("Shamaschizm commands:\n/shamaschizm help - Show this command overview.\n/soul [get] [player] - Show your or an online player's soul balance.\n/soul add <player> <amount> - Add souls (operator).\n/soul remove <player> <amount> - Remove souls, stopping at zero (operator).\n/soul set <player> <amount> - Set a soul balance (operator).\n/checkgarden - Check whether your current Schizm dungeon has a recorded garden.\n/shamaschizm experimental - Show experimental settings (operator).\n/shamaschizm experimental rooms <4..256> - Set the main room target beyond the entrance (default 60); garden, loops and caps are extra.\n/shamaschizm experimental deep <true|false> - Allow deep-tagged rooms (default false).\n/shamaschizm experimental arena2 <true|false> - Enable/disable entrance2 -> arena2 -> garden1 for newly generated dungeons (operator). Existing dungeons are unchanged."),false);
         // Inspect the final dispatcher at execution time, after all legacy handlers
         // have registered. This includes separate roots as well as merged subcommands.
         var dispatcher = source.getServer().getCommands().getDispatcher();
@@ -45,8 +52,21 @@ public final class ShamaschizmCommands {
         return false;
     }
     private static int status(CommandSourceStack source){
-        boolean enabled=ExperimentalSettings.get(source.getLevel()).arenaGarden();
-        source.sendSuccess(()->Component.literal("Experimental arena2 garden route: "+(enabled?"enabled":"disabled")+". Applies to newly generated dungeons only."),false);return 1;
+        var settings=ExperimentalSettings.get(source.getLevel());
+        source.sendSuccess(()->Component.literal("Experimental settings: arena2="+settings.arenaGarden()
+                +", rooms="+settings.roomTarget()+", deep="+settings.deepRooms()
+                +". Room target excludes the entrance and extra garden/loop/cap rooms. New dungeons only."),false);
+        return 1;
+    }
+    private static int setRooms(CommandSourceStack source,int count){
+        ExperimentalSettings.get(source.getLevel()).setRoomTarget(count);
+        source.sendSuccess(()->Component.literal("Main room target set to "+count+" for new dungeons. Entrance and garden/loop/cap rooms are extra; available space may limit generation."),true);
+        return 1;
+    }
+    private static int setDeep(CommandSourceStack source,boolean enabled){
+        ExperimentalSettings.get(source.getLevel()).setDeepRooms(enabled);
+        source.sendSuccess(()->Component.literal("Deep-tagged rooms "+(enabled?"enabled":"disabled")+" for new dungeons. Existing rooms are unchanged."),true);
+        return 1;
     }
     private static int set(CommandSourceStack source,boolean enabled){
         if(enabled){

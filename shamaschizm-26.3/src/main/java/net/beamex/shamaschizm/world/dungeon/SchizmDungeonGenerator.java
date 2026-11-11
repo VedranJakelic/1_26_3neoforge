@@ -101,16 +101,18 @@ public final class SchizmDungeonGenerator {
             new ItemStack(Items.OMINOUS_TRIAL_KEY),
             java.util.Optional.empty());
 
-    private record Exit(BlockPos local, Direction outward) {}
+    private record Exit(BlockPos local, Direction outward, boolean cyan) {
+        Exit(BlockPos local, Direction outward) { this(local, outward, false); }
+    }
     private record PortalMarker(BlockPos local, Direction towardLime, BlockPos lime) {}
     private record Room(DungeonRoomConfig.Entry entry, String name, StructureTemplate template, BlockPos entrance,
                         List<Exit> exits, List<BlockPos> markers, List<BlockPos> vaults,
                         List<BlockPos> serpentMarkers, List<BlockPos> illusionistMarkers,
-                        List<BlockPos> limeMarkers, List<PortalMarker> portals) {}
+                        List<BlockPos> limeMarkers, List<PortalMarker> portals, BlockPos cyan, Direction entranceFace) {}
     private record GeneratedPortal(Placed room, Doorway doorway) {}
     private record PortalPair(Doorway first, Doorway second) {}
     private record Placed(Room room, BlockPos origin, Rotation rotation, BoundingBox box) {}
-    private record OpenExit(Placed parent, BlockPos position, Direction outward) {}
+    private record OpenExit(Placed parent, BlockPos position, Direction outward, boolean cyan) {}
     public record Result(boolean placed, int additionalRooms) {}
 
     /** One immutable configuration snapshot and one selected start, shared with the teleporter. */
@@ -183,10 +185,15 @@ public final class SchizmDungeonGenerator {
         }
         var green = template.filterBlocks(BlockPos.ZERO, settings(Rotation.NONE), Blocks.WOOL.green());
         var red = template.filterBlocks(BlockPos.ZERO, settings(Rotation.NONE), Blocks.WOOL.red());
-        if ((!start && green.size() != 1) || (start && !green.isEmpty())) {
-            throw new IllegalArgumentException(name + ": requires " + (start ? "zero" : "one") + " green markers");
+        var cyanMarkers = woolMarkers(template, Blocks.WOOL.cyan());
+        if (cyanMarkers.size() > 1) throw new IllegalArgumentException(name + ": at most one cyan marker is supported");
+        BlockPos cyan = cyanMarkers.isEmpty() ? null : cyanMarkers.getFirst();
+        if (cyan != null && face(cyan, size.getX(), size.getZ(), name) != Direction.WEST)
+            throw new IllegalArgumentException(name + ": cyan marker must be on west wall (local X=0), away from corners");
+        if ((!start && (green.size() > 1 || (green.isEmpty() && cyan == null))) || (start && !green.isEmpty())) {
+            throw new IllegalArgumentException(name + ": requires " + (start ? "zero" : "one (or zero when a cyan entrance exists)") + " green markers");
         }
-        BlockPos entrance = start ? null : green.getFirst().pos();
+        BlockPos entrance = green.isEmpty() ? null : green.getFirst().pos();
         if (entrance != null && face(entrance, size.getX(), size.getZ(), name) != Direction.NORTH) {
             throw new IllegalArgumentException(name + ": green entrance must be on north wall (local Z=0)");
         }
@@ -199,6 +206,10 @@ public final class SchizmDungeonGenerator {
         }
         if (start && (exits.size() != 1 || exits.getFirst().outward != Direction.NORTH)) {
             throw new IllegalArgumentException(name + ": requires exactly one red marker on north wall");
+        }
+        if (cyan != null) {
+            exits.add(new Exit(cyan, Direction.WEST, true));
+            markers.add(cyan);
         }
         List<BlockPos> vaults = template.filterBlocks(
                         BlockPos.ZERO, settings(Rotation.NONE), Blocks.VAULT)
@@ -222,7 +233,7 @@ public final class SchizmDungeonGenerator {
         }
         return new Room(entry, name, template, entrance, List.copyOf(exits),
                 List.copyOf(markers), vaults, serpentMarkers, illusionistMarkers,
-                limeMarkers, List.copyOf(portals));
+                limeMarkers, List.copyOf(portals), cyan, Direction.NORTH);
     }
 
     private static List<BlockPos> woolMarkers(StructureTemplate template, Block wool) {
@@ -244,7 +255,7 @@ public final class SchizmDungeonGenerator {
     private static void addExits(Placed room, List<OpenExit> frontier) {
         for (Exit exit : room.room.exits) {
             frontier.add(new OpenExit(room, room.origin.offset(rotate(exit.local, room.rotation)),
-                    room.rotation.rotate(exit.outward)));
+                    room.rotation.rotate(exit.outward), exit.cyan));
         }
     }
 
@@ -264,9 +275,10 @@ public final class SchizmDungeonGenerator {
             List<Placed> candidates = new ArrayList<>();
             List<Double> weights = new ArrayList<>();
             for (Room room : prepared.choices) {
-                if (room.name.equals("shamaschizm:garden1") || room.exits.isEmpty()) continue;
-                if (layout.size() == 4 && room.exits.size() <= 2) continue;
+                if (room.name.equals("shamaschizm:garden1")) continue;
                 Placed candidate = attach(room, exit);
+                if (candidate == null || candidate.room.exits.isEmpty()) continue;
+                if (layout.size() == 4 && candidate.room.exits.size() <= 2) continue;
                 double weight = prepared.config.weight(room.entry, candidate.box.minY(), exit.parent.room.entry.tag());
                 if (weight > 0) { candidates.add(candidate); weights.add(weight); }
             }
@@ -332,6 +344,11 @@ public final class SchizmDungeonGenerator {
     }
 
     public static Result generate(ServerLevel level, BlockPos origin, Prepared prepared) {
+        return generatePlan(level, origin, prepared, true);
+    }
+
+    private static Result generatePlan(ServerLevel level, BlockPos origin, Prepared prepared,
+                                       boolean allowCyanFallback) {
         Random random = new Random(level.getSeed() ^ origin.asLong());
         List<Placed> layout = new ArrayList<>();
         List<OpenExit> frontier = new ArrayList<>();
@@ -379,6 +396,19 @@ public final class SchizmDungeonGenerator {
             frontier.addAll(blocked);
             tryGarden(level, layout, frontier, prepared, random, reservationCenter);
         }
+        int beforeCyan = layout.size();
+        if (!completeCyanConnections(level, layout, prepared, random, reservationCenter)) {
+            // No blocks have been placed. Do not regenerate this identical impossible
+            // layout on every portal touch: allow exactly one normal-only fallback.
+            Prepared fallback = ordinaryFallback(prepared, allowCyanFallback);
+            if (fallback != null) {
+                Shamaschizm.LOGGER.warn("Dungeon at {}: cyan pairing exhausted; planning once without optional cyan rooms", origin);
+                return generatePlan(level, origin, fallback, false);
+            }
+            Shamaschizm.LOGGER.warn("Dungeon at {} stopped before placement: a required cyan-to-cyan connection cannot fit", origin);
+            return new Result(false, 0);
+        }
+        if (layout.size() != beforeCyan) capRemainingExits(level, layout, prepared, random, reservationCenter);
         List<BoundingBox> olderRoomBoxes = new ArrayList<>();
         for (Placed room : layout) {
             var box = room.box;
@@ -479,7 +509,7 @@ public final class SchizmDungeonGenerator {
         for (int i=0;i<layout.size();i++) {
             Placed room=layout.get(i);
             if(room.room.entrance!=null) doors.add(new Door(i,
-                    room.origin.offset(rotate(room.room.entrance,room.rotation)),room.rotation.rotate(Direction.NORTH)));
+                    room.origin.offset(rotate(room.room.entrance,room.rotation)),room.rotation.rotate(room.room.entranceFace)));
             List<OpenExit> exits=new ArrayList<>();addExits(room,exits);
             for(OpenExit exit:exits)doors.add(new Door(i,exit.position,exit.outward));
         }
@@ -652,9 +682,63 @@ public final class SchizmDungeonGenerator {
         return best;
     }
 
+    private static Prepared ordinaryFallback(Prepared prepared, boolean allowed) {
+        if (!allowed || prepared.start.cyan != null) return null;
+        List<Room> ordinary = prepared.choices.stream().filter(room -> room.cyan == null).toList();
+        if (ordinary.isEmpty() || ordinary.size() == prepared.choices.size()) return null;
+        return new Prepared(prepared.config, prepared.start, ordinary);
+    }
+
+    private static boolean completeCyanConnections(ServerLevel level, List<Placed> layout,
+                                                    Prepared prepared, Random random, BlockPos center) {
+        return completeCyanConnections(level, layout, prepared, random, center, new int[] {256});
+    }
+
+    /** Required ports may not be capped or silently abandoned. Backtrack before placing any blocks. */
+    private static boolean completeCyanConnections(ServerLevel level, List<Placed> layout,
+                                                    Prepared prepared, Random random, BlockPos center, int[] budget) {
+        OpenExit exit = remainingExits(layout).stream().filter(port -> port.cyan).findFirst().orElse(null);
+        if (exit == null) return true;
+        if (budget[0] <= 0) return false;
+        List<Placed> candidates = new ArrayList<>();
+        List<Double> weights = new ArrayList<>();
+        for (Room room : prepared.choices) {
+            if (room.name.equals("shamaschizm:garden1")) continue;
+            Placed candidate = attach(room, exit);
+            if (candidate == null) continue;
+            // Count candidate evaluations too: failed fits used to consume no budget.
+            if (budget[0]-- <= 0) break;
+            double weight = prepared.config.weight(room.entry, candidate.box.minY(), exit.parent.room.entry.tag());
+            if (weight > 0 && available(level, candidate, exit, layout, center)) {
+                candidates.add(candidate); weights.add(weight);
+            }
+        }
+        while (!candidates.isEmpty() && budget[0]-- > 0) {
+            int selected = DungeonRoomConfig.chooseIndex(weights, random);
+            if (selected < 0) break;
+            Placed candidate = candidates.remove(selected); weights.remove(selected);
+            layout.add(candidate);
+            if (completeCyanConnections(level, layout, prepared, random, center, budget)) return true;
+            layout.removeLast();
+        }
+        return false;
+    }
+
+    private static Room throughCyan(Room room) {
+        if (room.cyan == null) return null;
+        List<Exit> exits = new ArrayList<>();
+        for (Exit exit : room.exits) if (!exit.cyan) exits.add(exit);
+        if (room.entrance != null) exits.add(new Exit(room.entrance, room.entranceFace));
+        return new Room(room.entry, room.name, room.template, room.cyan, List.copyOf(exits),
+                room.markers, room.vaults, room.serpentMarkers, room.illusionistMarkers,
+                room.limeMarkers, room.portals, room.cyan, Direction.WEST);
+    }
+
     private static Placed attach(Room room, OpenExit exit) {
+        if (exit.cyan) room = throughCyan(room);
+        if (room == null || room.entrance == null) return null;
         for (Rotation rotation : Rotation.values()) {
-            if (rotation.rotate(Direction.NORTH) == exit.outward.getOpposite()) {
+            if (rotation.rotate(room.entranceFace) == exit.outward.getOpposite()) {
                 return placed(room, exit.position.subtract(rotate(room.entrance, rotation)), rotation);
             }
         }
@@ -663,6 +747,7 @@ public final class SchizmDungeonGenerator {
 
     private static boolean available(ServerLevel level, Placed candidate, OpenExit exit,
                                      List<Placed> layout, BlockPos center) {
+        if (candidate == null) return false;
         BoundingBox b = candidate.box;
         // The teleporter uses this same reservation radius to separate dungeons.
         return b.minX() >= (long) center.getX() - RESERVATION_RADIUS
@@ -685,10 +770,11 @@ public final class SchizmDungeonGenerator {
         List<Double> weights = new ArrayList<>();
         for (Room room : prepared.choices) {
             if (room.name.equals("shamaschizm:garden1")) continue;
-            if (deadEndOnly) {
-                if (!room.exits.isEmpty()) continue;
-            } else if (layout.size() - 1 < FIRST_ROOMS_WITH_EXITS && room.exits.isEmpty()) continue;
             Placed candidate = attach(room, exit);
+            if (candidate == null) continue;
+            if (deadEndOnly) {
+                if (!candidate.room.exits.isEmpty()) continue;
+            } else if (layout.size() - 1 < FIRST_ROOMS_WITH_EXITS && candidate.room.exits.isEmpty()) continue;
             double weight = prepared.config.weight(room.entry, candidate.box.minY(), exit.parent.room.entry.tag());
             if (weight > 0) {
                 candidates.add(candidate);
@@ -714,6 +800,9 @@ public final class SchizmDungeonGenerator {
 
     /** After a failure, uniformly choose any OTHER available connection first. */
     private static OpenExit removeRandomExit(List<OpenExit> exits, OpenExit avoid, Random random) {
+        List<Integer> cyan = new ArrayList<>();
+        for (int i = 0; i < exits.size(); i++) if (exits.get(i).cyan) cyan.add(i);
+        if (!cyan.isEmpty()) return exits.remove((int)cyan.get(random.nextInt(cyan.size())));
         int excluded = avoid == null ? -1 : exits.indexOf(avoid);
         if (excluded < 0 || exits.size() == 1) return exits.remove(random.nextInt(exits.size()));
         int selected = random.nextInt(exits.size() - 1);
@@ -807,7 +896,7 @@ public final class SchizmDungeonGenerator {
         Shamaschizm.LOGGER.info("All available garden exits exhausted; retaining dungeon without garden");
     }
 
-    private record Connection(BlockPos position, Direction outward) {}
+    private record Connection(BlockPos position, Direction outward, boolean cyan) {}
 
     private record ExitPair(OpenExit start, OpenExit target, long distanceSquared) {}
 
@@ -828,10 +917,10 @@ public final class SchizmDungeonGenerator {
             addExits(room, open);
             if (room.room.entrance != null) {
                 used.add(new Connection(room.origin.offset(rotate(room.room.entrance, room.rotation)),
-                        room.rotation.rotate(Direction.NORTH).getOpposite()));
+                        room.rotation.rotate(room.room.entranceFace).getOpposite(), room.room.entranceFace == Direction.WEST));
             }
         }
-        open.removeIf(exit -> used.contains(new Connection(exit.position, exit.outward)));
+        open.removeIf(exit -> used.contains(new Connection(exit.position, exit.outward, exit.cyan)));
 
         // A loop finishes by overlaying two red exit markers with opposing
         // outward directions. Treat both sides as used just like a normal
@@ -839,8 +928,8 @@ public final class SchizmDungeonGenerator {
         Set<Connection> seen = new HashSet<>();
         Set<Connection> joined = new HashSet<>();
         for (OpenExit exit : open) {
-            Connection connection = new Connection(exit.position, exit.outward);
-            Connection opposite = new Connection(exit.position, exit.outward.getOpposite());
+            Connection connection = new Connection(exit.position, exit.outward, exit.cyan);
+            Connection opposite = new Connection(exit.position, exit.outward.getOpposite(), exit.cyan);
             if (seen.contains(opposite)) {
                 joined.add(connection);
                 joined.add(opposite);
@@ -848,7 +937,7 @@ public final class SchizmDungeonGenerator {
                 seen.add(connection);
             }
         }
-        open.removeIf(exit -> joined.contains(new Connection(exit.position, exit.outward)));
+        open.removeIf(exit -> joined.contains(new Connection(exit.position, exit.outward, exit.cyan)));
         return open;
     }
 
@@ -947,7 +1036,7 @@ public final class SchizmDungeonGenerator {
         List<LoopPlan> result = new ArrayList<>();
         for (LoopHalf left : first) {
             Connection wanted = new Connection(
-                    left.frontier.position, left.frontier.outward.getOpposite());
+                    left.frontier.position, left.frontier.outward.getOpposite(), left.frontier.cyan);
             for (LoopHalf right : secondByFrontier.getOrDefault(wanted, List.of())) {
                 int roomCount = left.rooms.size() + right.rooms.size();
                 if (roomCount == 0 || roomCount > MAX_LOOP_ROOMS
@@ -980,8 +1069,9 @@ public final class SchizmDungeonGenerator {
                 List<Placed> occupied = new ArrayList<>(layout);
                 occupied.addAll(state.rooms);
                 for (Room room : prepared.choices) {
-                    if (room.name.equals("shamaschizm:garden1") || room.exits.isEmpty()) continue;
+                    if (room.name.equals("shamaschizm:garden1")) continue;
                     Placed candidate = attach(room, state.frontier);
+                    if (candidate == null || candidate.room.exits.isEmpty()) continue;
                     double weight = prepared.config.weight(room.entry, candidate.box.minY(),
                             state.frontier.parent.room.entry.tag());
                     if (weight <= 0.0D) continue;
@@ -1039,7 +1129,7 @@ public final class SchizmDungeonGenerator {
     }
 
     private static Connection connection(OpenExit exit) {
-        return new Connection(exit.position, exit.outward);
+        return new Connection(exit.position, exit.outward, exit.cyan);
     }
 
     private static boolean halvesCompatible(LoopHalf first, LoopHalf second) {
@@ -1104,11 +1194,11 @@ public final class SchizmDungeonGenerator {
     }
 
     private static boolean sameExit(OpenExit first, OpenExit second) {
-        return first.position.equals(second.position) && first.outward == second.outward;
+        return first.position.equals(second.position) && first.outward == second.outward && first.cyan == second.cyan;
     }
 
     private static boolean closes(OpenExit exit, OpenExit target) {
-        return exit.position.equals(target.position)
+        return exit.cyan == target.cyan && exit.position.equals(target.position)
                 && exit.outward == target.outward.getOpposite();
     }
 
@@ -1251,7 +1341,7 @@ public final class SchizmDungeonGenerator {
                     BlockPos target = room.origin.offset(rotate(targetLocal, room.rotation));
                     double dx = target.getX() - pos.getX(), dz = target.getZ() - pos.getZ();
                     float yaw = dx == 0 && dz == 0
-                            ? room.rotation.rotate(Direction.NORTH).toYRot()
+                            ? room.rotation.rotate(room.room.entranceFace).toYRot()
                             : (float) Math.toDegrees(Math.atan2(-dx, dz));
                     illusionist.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0F);
                     illusionist.setYHeadRot(yaw);

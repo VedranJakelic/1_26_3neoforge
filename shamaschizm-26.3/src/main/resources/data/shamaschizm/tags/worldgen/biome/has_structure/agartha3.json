@@ -2,19 +2,15 @@
   "replace": false,
   "values": [
     "minecraft:snowy_taiga",
-    "minecraft:snowy_plains",
     "minecraft:ice_spikes",
-    "minecraft:snowy_slopes",
-    "minecraft:frozen_peaks",
-    "minecraft:frozen_river",
-    "minecraft:plains",
     "minecraft:swamp",
     "minecraft:dark_forest",
-    "minecraft:windswept_hills",
-    "minecraft:windswept_gravelly_hills",
     "minecraft:sparse_jungle",
     "minecraft:bamboo_jungle",
-    "minecraft:jagged_peaks",
-    "minecraft:stony_peaks"
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:mangrove_swamp"
   ]
 }

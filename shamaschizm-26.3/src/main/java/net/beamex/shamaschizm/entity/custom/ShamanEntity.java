@@ -86,6 +86,9 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
             new net.minecraft.world.entity.AnimationState();
 
     private final MerchantOffers offers = new MerchantOffers();
+    // Session-only offers must never replace or serialize over the usual stock.
+    private @Nullable MerchantOffers witnessOffers;
+    private boolean witnessSold;
     private @Nullable Player tradingPlayer;
     private int villagerXp = 0;
     private final Map<UUID, Integer> playerLingerTicks = new HashMap<>();
@@ -117,6 +120,7 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player p) {
+        if (p instanceof ServerPlayer sp) beginWitnessBargain(sp);
         return new ShamanTradeMenu(id, inv, this);
     }
 
@@ -125,12 +129,12 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.SUCCESS;
         if (sp.level().isClientSide()) return InteractionResult.SUCCESS;
 
-        if (!isAlive() || (tradingPlayer != null && tradingPlayer != sp)) return InteractionResult.PASS;
+        if (!isAlive() || tradingPlayer != null) return InteractionResult.PASS;
         this.setTradingPlayer(sp);
         if (this.offers.isEmpty()) buildOffers();
         if (sp.openMenu(this).isPresent()) {
             sp.connection.send(new ClientboundMerchantOffersPacket(
-                    sp.containerMenu.containerId, this.offers, 1, this.villagerXp, false, false));
+                    sp.containerMenu.containerId, getOffers(), 1, this.villagerXp, false, false));
         } else {
             this.setTradingPlayer(null);
         }
@@ -139,9 +143,33 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
     }
 
     // ---- Merchant impl ----
-    @Override public MerchantOffers getOffers() { if (this.offers.isEmpty()) buildOffers(); return this.offers; }
+    @Override public MerchantOffers getOffers() {
+        if (witnessOffers != null) return witnessOffers;
+        return ordinaryOffers();
+    }
+    private MerchantOffers ordinaryOffers() {
+        if (this.offers.isEmpty()) buildOffers();
+        var dreamcatcher = net.beamex.shamaschizm.dreamcatcher.DreamcatcherRegistration.ITEM;
+        if (dreamcatcher != null && offers.stream().noneMatch(offer -> offer.getResult().is(dreamcatcher))) {
+            int index = offers.size();
+            for (int i=0;i<offers.size();i++) if (offers.get(i).getBaseCostA().is(Items.NETHER_STAR)) { index=i; break; }
+            offers.add(index, new MerchantOffer(new ItemCost(Items.FEATHER,4),
+                    java.util.Optional.of(new ItemCost(Items.EMERALD,1)), new ItemStack(dreamcatcher),0,999,0,0F));
+        }
+        return this.offers;
+    }
     @Override public void overrideOffers(MerchantOffers newOffers) { this.offers.clear(); if (newOffers != null) this.offers.addAll(newOffers); }
-    @Override public void notifyTrade(MerchantOffer offer) {}
+    @Override public void notifyTrade(MerchantOffer offer) {
+        if (witnessOffers == null || witnessSold || witnessOffers.get(0) != offer
+                || !(tradingPlayer instanceof ServerPlayer player)) return;
+        witnessSold = true;
+        player.getPersistentData().remove(witnessBargainKey());
+        silenceGuidance(player);
+        witnessDialogue(player, "sold_first",
+                "The cursed sinners await the Day of Judgement. By the Fire they will be returned upon the land, only not as themselves.");
+        witnessDialogue(player, "sold_second",
+                "- You may believe you had beaten them, but they’ve only returned to their earthen prisons again.");
+    }
     @Override public void notifyTradeUpdated(ItemStack stack) {}
     @Override public int getVillagerXp() { return this.villagerXp; }
     @Override public void overrideXp(int xp) { this.villagerXp = Math.max(0, xp); }
@@ -149,7 +177,10 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
 
     @Override public SoundEvent getNotifyTradeSound() { return SoundEvents.VILLAGER_YES; }
     @Override public @Nullable Player getTradingPlayer() { return this.tradingPlayer; }
-    @Override public void setTradingPlayer(@Nullable Player player) { this.tradingPlayer = player; }
+    @Override public void setTradingPlayer(@Nullable Player player) {
+        this.tradingPlayer = player;
+        if (player == null) { witnessOffers = null; witnessSold = false; }
+    }
     @Override public boolean isClientSide() { return this.level().isClientSide(); }
 
     @Override
@@ -170,7 +201,7 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
     @Override
     protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
         super.addAdditionalSaveData(output);
-        output.store("Offers", MerchantOffers.CODEC, getOffers());
+        output.store("Offers", MerchantOffers.CODEC, ordinaryOffers());
         output.storeNullable("AgarthaPosition", BlockPos.CODEC, this.cachedAgarthaPosition);
         output.storeNullable("AgarthaBiome", Identifier.CODEC, this.cachedAgarthaBiome);
     }
@@ -183,6 +214,61 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
         this.cachedAgarthaBiome = input.read("AgarthaBiome", Identifier.CODEC).orElse(null);
         setPersistenceRequired();
         setTradingPlayer(null);
+    }
+
+    private String witnessBargainKey() {
+        return "shamaschizm_witness_bargain_" + getUUID();
+    }
+
+    public static boolean hasWitness(Player player) {
+        var spear = net.beamex.shamaschizm.saints.vindication.VindicationRegistration.SPEAR;
+        if (spear == null) return false;
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            if (player.getInventory().getItem(i).is(spear)) return true;
+        }
+        return player.getOffhandItem().is(spear);
+    }
+
+    private void beginWitnessBargain(ServerPlayer player) {
+        witnessOffers = null;
+        witnessSold = false;
+        if (!hasWitness(player)) return;
+        silenceGuidance(player);
+        int declined = player.getPersistentData().getInt(witnessBargainKey()).orElse(0);
+        int price = declined == 0 ? 3 : 6;
+        witnessOffers = new MerchantOffers();
+        witnessOffers.add(new MerchantOffer(
+                new ItemCost(net.beamex.shamaschizm.saints.vindication.VindicationRegistration.SPEAR, 1),
+                java.util.Optional.empty(),
+                new ItemStack(net.beamex.shamaschizm.event.ModItemBootstrap.SOUL_ICON, price),
+                0, 1, 0, 0F));
+    }
+
+    /** Called once, before MerchantMenu returns its inputs and clears the trading player. */
+    public void closeWitnessBargain(ServerPlayer player) {
+        if (witnessOffers == null || witnessSold || !player.isAlive() || !stillValid(player)) return;
+        int declined = Math.max(0, Math.min(2,
+                player.getPersistentData().getInt(witnessBargainKey()).orElse(0)));
+        player.getPersistentData().putInt(witnessBargainKey(), Math.min(2, declined + 1));
+        if (declined == 1) {
+            silenceGuidance(player);
+            witnessDialogue(player, "refused_first", "You know nothing of what you hold! You MUST sell it to me!");
+            witnessDialogue(player, "refused_second", "You are unworthy!!");
+        }
+    }
+
+    private void silenceGuidance(ServerPlayer player) {
+        UUID id = player.getUUID();
+        playerLingerTicks.remove(id);
+        playerGuidanceStages.remove(id);
+        nextGuidanceStageTimes.remove(id);
+        playerGuidanceCooldowns.put(id, level().getGameTime() + PLAYER_GUIDANCE_COOLDOWN_TICKS);
+    }
+
+    private void witnessDialogue(ServerPlayer player, String key, String fallback) {
+        // Fallback text keeps existing local language files intact and allows resource-pack translations.
+        sendShamanDialogue(player, Component.translatableWithFallback(
+                "dialogue.shamaschizm.shaman.witness." + key, fallback));
     }
 
     // ---- Offers ----
@@ -221,6 +307,12 @@ public class ShamanEntity extends PathfinderMob implements Merchant, MenuProvide
                 ancientBlueprintStack(),  // <- lazy, registry-safe
                 0, 999, 0, 0.0f
         ));
+
+        // Dreamcatcher: ordinary two-input trade, directly above Nether Star -> Soul.
+        this.offers.add(new MerchantOffer(new ItemCost(Items.FEATHER, 4),
+                java.util.Optional.of(new ItemCost(Items.EMERALD, 1)),
+                new ItemStack(net.beamex.shamaschizm.dreamcatcher.DreamcatcherRegistration.ITEM),
+                0, 999, 0, 0.0F));
 
         // Nether Star → Soul (UI ghost; menu updates backend souls)
         this.offers.add(new MerchantOffer(new ItemCost(Items.NETHER_STAR, 1), java.util.Optional.empty(),

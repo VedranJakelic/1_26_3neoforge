@@ -10,6 +10,13 @@
         {
           "sampler_name": "In",
           "target": "minecraft:main"
+        },
+        {
+          "sampler_name": "Ritual",
+          "location": "shamaschizm:ritual_vision",
+          "width": 929,
+          "height": 780,
+          "bilinear": true
         }
       ],
       "output": "swap",
@@ -21,6 +28,30 @@
             "value": [
               0,
               0,
+              0,
+              0
+            ]
+          }
+        ],
+        "FractalEyes": [
+          {
+            "name": "Eyes",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "TripVision": [
+          {
+            "name": "Vision",
+            "type": "vec4",
+            "value": [
+              0.5,
+              0.5,
               0,
               0
             ]

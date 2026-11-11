@@ -20,6 +20,21 @@ import net.beamex.shamaschizm.world.block.SchizmStoneRegistration;
 
 public final class SchizmTeleporter {
     private static final int SCALE = 8;
+    // Weak world keys: failures last for this loaded world only, never enter saves.
+    // Shared by players so another player cannot retrigger the same failed plan.
+    private static final java.util.Map<ServerLevel, Set<BlockPos>> FAILED_GENERATION = new java.util.WeakHashMap<>();
+
+    private static boolean generationBlocked(ServerLevel target, BlockPos source) {
+        return FAILED_GENERATION.getOrDefault(target, Set.of()).contains(source);
+    }
+
+    private static void generationFailed(ServerPlayer player, ServerLevel target, BlockPos source) {
+        if (FAILED_GENERATION.computeIfAbsent(target, ignored -> new HashSet<>()).add(source.immutable())) {
+            Shamaschizm.LOGGER.warn("Dungeon generation stopped for source portal {}. Automatic retries are disabled until the world is reloaded.", source);
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+                    "No dungeon could fit here. Generation stopped; reload the world to retry."));
+        }
+    }
     private SchizmTeleporter() {}
 
     private static BlockPos canonical(ServerLevel level, BlockPos touched) {
@@ -45,10 +60,11 @@ public final class SchizmTeleporter {
         PortalLinks data = PortalLinks.get(target);
         PortalLinks.Link link = data.source(source);
         if (link == null) {
+            if (generationBlocked(target, source)) return;
             int y = target.getMaxY() - SchizmDungeonGenerator.MAX_ROOM_HEIGHT;
             var prepared = SchizmDungeonGenerator.prepare(target, y - 1,
                     target.getSeed() ^ source.asLong());
-            if (prepared == null) return;
+            if (prepared == null) { generationFailed(player, target, source); return; }
             var template = prepared.startTemplate();
             var size = template.getSize();
             int separation = SchizmDungeonGenerator.RESERVATION_RADIUS * 2 + 16;
@@ -69,11 +85,11 @@ public final class SchizmTeleporter {
                     if (!data.reserved(candidate, separation) && canUseRoom(target, template, candidate, prepared.startExit())) { doorway = candidate; free = true; }
                 }
             }
-            if (!free) return;
+            if (!free) { generationFailed(player, target, source); return; }
             BlockPos origin = doorway.subtract(prepared.startExit());
-            if (origin.getY() < target.getMinY() || origin.getY() + size.getY() > target.getMaxY() + 1) return;
+            if (origin.getY() < target.getMinY() || origin.getY() + size.getY() > target.getMaxY() + 1) { generationFailed(player, target, source); return; }
             var generated = SchizmDungeonGenerator.generate(target, origin, prepared);
-            if (!generated.placed()) return;
+            if (!generated.placed()) { generationFailed(player, target, source); return; }
             // Prefer a safe tile beside the actual return portal in the new template.
             BlockPos arrival = null;
             var portals = template.filterBlocks(origin, new StructurePlaceSettings(), ModBlocks.SCHIZM_PORTAL);

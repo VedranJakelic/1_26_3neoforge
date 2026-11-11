@@ -1,0 +1,422 @@
+{
+  "targets": {
+    "scene": {
+      "width": 192,
+      "height": 108
+    },
+    "detections": {
+      "width": 192,
+      "height": 108
+    },
+    "field": {
+      "width": 192,
+      "height": 108
+    },
+    "swap": {},
+    "flow": {
+      "width": 192,
+      "height": 108
+    },
+    "flow_history": {
+      "width": 192,
+      "height": 108,
+      "persistent": true
+    },
+    "scene_history": {
+      "width": 192,
+      "height": 108,
+      "persistent": true
+    },
+    "peaks": {
+      "width": 192,
+      "height": 108
+    },
+    "shade_field": {
+      "width": 192,
+      "height": 108
+    },
+    "shade": {
+      "width": 192,
+      "height": 108
+    },
+    "shade_history": {
+      "width": 192,
+      "height": 108,
+      "persistent": true
+    }
+  },
+  "passes": [
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "minecraft:main",
+          "bilinear": true
+        }
+      ],
+      "output": "scene",
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia_detect",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "scene",
+          "bilinear": true
+        }
+      ],
+      "output": "detections",
+      "uniforms": {
+        "EyeConfig": [
+          {
+            "name": "Eye",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              1,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia_peaks",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "detections",
+          "bilinear": true
+        }
+      ],
+      "output": "peaks"
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia_field",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "peaks",
+          "bilinear": false
+        }
+      ],
+      "output": "field",
+      "uniforms": {
+        "EyeConfig": [
+          {
+            "name": "Eye",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "EyeStyle": [
+          {
+            "name": "Style",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia_field",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "peaks",
+          "bilinear": false
+        }
+      ],
+      "output": "shade_field",
+      "uniforms": {
+        "EyeConfig": [
+          {
+            "name": "Eye",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "EyeStyle": [
+          {
+            "name": "Style",
+            "type": "vec4",
+            "value": [
+              1,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia_smooth",
+      "inputs": [
+        {
+          "sampler_name": "Target",
+          "target": "field",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "History",
+          "target": "flow_history",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "Scene",
+          "target": "scene",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "Previous",
+          "target": "scene_history",
+          "bilinear": false
+        }
+      ],
+      "output": "flow",
+      "uniforms": {
+        "EyeConfig": [
+          {
+            "name": "Eye",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "EyeHistory": [
+          {
+            "name": "History",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia_smooth",
+      "inputs": [
+        {
+          "sampler_name": "Target",
+          "target": "shade_field",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "History",
+          "target": "shade_history",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "Scene",
+          "target": "scene",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "Previous",
+          "target": "scene_history",
+          "bilinear": false
+        }
+      ],
+      "output": "shade",
+      "uniforms": {
+        "EyeConfig": [
+          {
+            "name": "Eye",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "EyeHistory": [
+          {
+            "name": "History",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/pareidolia",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "minecraft:main",
+          "bilinear": true
+        },
+        {
+          "sampler_name": "Field",
+          "target": "flow",
+          "bilinear": false
+        },
+        {
+          "sampler_name": "Shade",
+          "target": "shade",
+          "bilinear": false
+        }
+      ],
+      "output": "swap"
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "flow",
+          "bilinear": false
+        }
+      ],
+      "output": "flow_history",
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "shade",
+          "bilinear": false
+        }
+      ],
+      "output": "shade_history",
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "scene",
+          "bilinear": false
+        }
+      ],
+      "output": "scene_history",
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "swap",
+          "bilinear": false
+        }
+      ],
+      "output": "minecraft:main",
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

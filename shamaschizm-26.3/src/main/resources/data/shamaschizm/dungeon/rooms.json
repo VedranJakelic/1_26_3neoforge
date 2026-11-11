@@ -130,7 +130,7 @@
     { "template": "shamaschizm:room93", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room94", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room95", "tag": "normal", "weight": 1.0 },
-    { "template": "shamaschizm:room96", "tag": "normal", "weight": 1.0 },
+    { "template": "shamaschizm:room96", "tag": "normal", "weight": 2.0 },
     { "template": "shamaschizm:room97", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room98", "tag": "moss", "weight": 1.0 },
     { "template": "shamaschizm:room99", "tag": "moss", "weight": 1.0 },
@@ -150,7 +150,7 @@
     { "template": "shamaschizm:room113", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room114", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room115", "tag": "normal", "weight": 1.0 },
-    { "template": "shamaschizm:room116", "tag": "normal", "weight": 1.0 },
+    { "template": "shamaschizm:room116", "tag": "normal", "weight": 2.5 },
     { "template": "shamaschizm:room117", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room118", "tag": "moss", "weight": 1.0 },
     { "template": "shamaschizm:room119", "tag": "normal", "weight": 1.0 },
@@ -178,7 +178,7 @@
     { "template": "shamaschizm:room141", "tag": "grand", "weight": 1.0 },
     { "template": "shamaschizm:room142", "tag": "grand", "weight": 1.0 },
     { "template": "shamaschizm:room143", "tag": "normal", "weight": 1.0 },
-    { "template": "shamaschizm:room144", "tag": "grand", "weight": 3.0 },
+    { "template": "shamaschizm:room144", "tag": "grand", "weight": 2.0 },
     { "template": "shamaschizm:room145", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room146", "tag": "normal", "weight": 1.0 },
     { "template": "shamaschizm:room147", "tag": "normal", "weight": 1.0 },
@@ -221,6 +221,9 @@
     { "template": "shamaschizm:room184", "tag": "normal", "weight": 1 },
     { "template": "shamaschizm:room185", "tag": "deep", "weight": 2 },
     { "template": "shamaschizm:room186", "tag": "deep", "weight": 2 },
-    { "template": "shamaschizm:room187", "tag": "deep", "weight": 2 }
+    { "template": "shamaschizm:room187", "tag": "deep", "weight": 2 },
+    { "template": "shamaschizm:room188", "tag": "normal", "weight": 1 },
+    { "template": "shamaschizm:room189", "tag": "normal", "weight": 2 },
+    { "template": "shamaschizm:room190", "tag": "normal", "weight": 2 }
   ]
 }
