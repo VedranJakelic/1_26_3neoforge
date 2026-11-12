@@ -3,7 +3,6 @@ package net.beamex.shamaschizm.homunculus;
 import java.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,6 +27,8 @@ public final class HomunculusEntity extends PathfinderMob {
     private static final EntityDataAccessor<String> SKIN_ID = SynchedEntityData.defineId(HomunculusEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<String> SKIN_NAME = SynchedEntityData.defineId(HomunculusEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<net.minecraft.world.item.component.ResolvableProfile> PROFILE = SynchedEntityData.defineId(HomunculusEntity.class, EntityDataSerializers.RESOLVABLE_PROFILE);
+    private static final EntityDataAccessor<Optional<BlockPos>> BIRTH_POS = SynchedEntityData.defineId(HomunculusEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
+    private int birthTicks;
     private UUID owner;
     private int fed, lastAttackStamp = -1, lastHurtStamp = -1, attackCooldown, stuckTicks;
     private HomunculusCommand command = HomunculusCommand.STAY;
@@ -45,11 +46,11 @@ public final class HomunculusEntity extends PathfinderMob {
         setPersistenceRequired();
     }
     public static AttributeSupplier.Builder attributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .18)
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .12)
                 .add(Attributes.ATTACK_DAMAGE, 2).add(Attributes.FOLLOW_RANGE, 32).add(Attributes.STEP_HEIGHT, 1);
     }
     @Override protected void defineSynchedData(SynchedEntityData.Builder b) {
-        super.defineSynchedData(b); b.define(STAGE, 0); b.define(SKIN_ID, ""); b.define(SKIN_NAME, ""); b.define(PROFILE, net.minecraft.world.item.component.ResolvableProfile.createUnresolved(new UUID(0,0)));
+        super.defineSynchedData(b); b.define(STAGE, 0); b.define(BIRTH_POS, Optional.empty()); b.define(SKIN_ID, ""); b.define(SKIN_NAME, ""); b.define(PROFILE, net.minecraft.world.item.component.ResolvableProfile.createUnresolved(new UUID(0,0)));
     }
     public int stage() { return entityData.get(STAGE); }
     public String skinId() { return entityData.get(SKIN_ID); }
@@ -61,26 +62,24 @@ public final class HomunculusEntity extends PathfinderMob {
     public ServerPlayer ownerPlayer() {
         return level() instanceof ServerLevel s && owner != null ? s.getServer().getPlayerList().getPlayer(owner) : null;
     }
-    public boolean accepts(Player p) { return stage() == 0 || p.getUUID().equals(owner); }
+    public boolean accepts(Player p) { return !isIncubating() && (stage() == 0 || p.getUUID().equals(owner)); }
     @Override public boolean removeWhenFarAway(double distance) { return false; }
     @Override protected void registerGoals() { goalSelector.addGoal(0, new FloatGoal(this)); }
 
     public boolean command(ServerPlayer p, HomunculusCommand next) {
         if (!accepts(p) || distanceToSqr(p) > 100) return false;
         if (stage() < next.requiredStage) {
-            p.sendSystemMessage(Component.translatableWithFallback("message.shamaschizm.homunculus.too_young", "The homunculus has not learned that command yet."));
             return false;
         }
         work.releaseTickets(); work.resetJob();
         owner = p.getUUID(); command = next; anchor = blockPosition();
-        getNavigation().stop(); setTarget(null); stuckTicks = 0;
+        getNavigation().stop(); setSprinting(false); setTarget(null); stuckTicks = 0;
         lastAttackStamp = p.getLastHurtMobTimestamp(); lastHurtStamp = p.getLastHurtByMobTimestamp();
         if (next == HomunculusCommand.DESTROY) {
             marchStart = position(); marchDirection = p.getLookAngle().multiply(1,0,1).normalize();
             if(marchDirection.lengthSqr()<.001){double yaw=Math.toRadians(p.getYRot());marchDirection=new Vec3(-Math.sin(yaw),0,Math.cos(yaw));}
             marchProgress = 0;
         }
-        p.sendSystemMessage(Component.translatableWithFallback("message.shamaschizm.homunculus.command", "Homunculus: %s", next.name().toLowerCase(Locale.ROOT)));
         return true;
     }
     @Override protected InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -108,8 +107,7 @@ public final class HomunculusEntity extends PathfinderMob {
                             entityData.set(SKIN_ID, owner.toString()); entityData.set(SKIN_NAME, player.getGameProfile().name());
                         }
                         entityData.set(STAGE, stage() + 1); applyStage(); setHealth(getMaxHealth());
-                        player.sendSystemMessage(Component.translatableWithFallback("message.shamaschizm.homunculus.grown", "The homunculus has grown."));
-                    } else player.sendSystemMessage(Component.translatableWithFallback("message.shamaschizm.homunculus.fed", "Homunculus feeding: %s / %s", fed, required));
+                    }
                 }
             }
             return InteractionResult.SUCCESS;
@@ -139,10 +137,12 @@ public final class HomunculusEntity extends PathfinderMob {
     private void applyStage() {
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(HomunculusRules.maximumHealth(stage()));
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stage() == 2 ? 6 : 2);
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stage() == 0 ? .12 : stage() == 1 ? .18 : .25);
         refreshDimensions();
     }
     @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key); if (STAGE.equals(key)) refreshDimensions();
+        if (BIRTH_POS.equals(key) && !isIncubating()) noPhysics=false;
     }
     @Override protected EntityDimensions getDefaultDimensions(Pose pose) {
         if (stage() == 0) return EntityDimensions.scalable(.65F, .5F);
@@ -157,26 +157,44 @@ public final class HomunculusEntity extends PathfinderMob {
         Vec3 ahead = position();
         var path = getNavigation().getPath();
         if (path != null && !path.isDone()) {
-            Vec3 delta = path.getNextEntityPos(this).subtract(position());
-            ahead = position().add(delta.normalize().scale(Math.min(.75, delta.length())));
+            Vec3 node = path.getNextEntityPos(this);
+            Vec3 horizontal = node.subtract(position()).multiply(1, 0, 1);
+            ahead = position().add(horizontal.normalize().scale(Math.min(.75, horizontal.length())));
+            // Test on top of an ascending step, not partway through its solid side.
+            if (node.y > getY() && node.y - getY() <= maxUpStep() + .05)
+                ahead = new Vec3(ahead.x, node.y, ahead.z);
         }
-        Pose wanted = Pose.SWIMMING;
-        for (Pose pose : new Pose[]{Pose.STANDING, Pose.CROUCHING, Pose.SWIMMING})
+        Pose wanted = getPose();
+        for (Pose pose : new Pose[]{Pose.STANDING, Pose.CROUCHING, Pose.SWIMMING}) {
             if (fits(pose, position()) && fits(pose, ahead)) { wanted = pose; break; }
+        }
+        // A wall with no clearance in any pose is an obstacle, not a reason to crawl.
         if (getPose() != wanted) { setPose(wanted); refreshDimensions(); }
     }
-    /** Plan at crawling height; physical pose expands only when the next segment has room. */
+    /** Use the short planning box for tunnels, restoring the physical pose before moving. */
     void walkTo(Vec3 at) {
-        if (stage() == 2) { setPose(Pose.SWIMMING); refreshDimensions(); }
-        getNavigation().moveTo(at.x, at.y, at.z, 1);
+        var path = workPath(BlockPos.containing(at));
+        getNavigation().moveTo(path, 1);
         posture();
+        updateRunning();
     }
     net.minecraft.world.level.pathfinder.Path workPath(BlockPos at) {
-        Pose old=getPose();
-        if(stage()==2){setPose(Pose.SWIMMING);refreshDimensions();}
-        var path=getNavigation().createPath(at,0);
-        if(stage()==2){setPose(old);refreshDimensions();}
-        return path;
+        Pose old = getPose();
+        try {
+            if (stage() == 2) { setPose(Pose.SWIMMING); refreshDimensions(); }
+            return getNavigation().createPath(at, 0);
+        } finally {
+            if (stage() == 2) { setPose(old); refreshDimensions(); }
+        }
+    }
+    private void updateRunning() {
+        ServerPlayer player = ownerPlayer();
+        boolean catchingUp = (command == HomunculusCommand.FOLLOW || command == HomunculusCommand.FIGHT)
+                && player != null && player.level() == level() && distanceToSqr(player) > 36;
+        boolean chasing = getTarget() != null && getTarget().isAlive() && distanceToSqr(getTarget()) > 4;
+        // Vanilla sprinting supplies its normal speed modifier; do not multiply navigation speed too.
+        setSprinting(stage() == 2 && getPose() == Pose.STANDING && !isInWater()
+                && !getNavigation().isDone() && (catchingUp || chasing || command == HomunculusCommand.DESTROY));
     }
     private boolean eligible(LivingEntity e) {
         return e != this && e.isAlive() && unreachableTargets.getOrDefault(e.getUUID(),0)<=tickCount && !e.getUUID().equals(owner) && !isAlliedTo(e)
@@ -188,11 +206,49 @@ public final class HomunculusEntity extends PathfinderMob {
         double along = d.dot(marchDirection);
         return along >= -2 && along <= 200 && d.subtract(marchDirection.scale(along)).lengthSqr() <= 36;
     }
+    public boolean isIncubating() { return entityData.get(BIRTH_POS).isPresent(); }
+    public void beginRitualBirth(BlockPos composter) {
+        entityData.set(BIRTH_POS,Optional.of(composter.immutable())); birthTicks=0;
+        setNoAi(true);setNoGravity(true);setPermanentlyInvulnerable(true);noPhysics=true;
+        setPos(composter.getX()+.5,composter.getY()+.125,composter.getZ()+.5);
+        setDeltaMovement(Vec3.ZERO);
+    }
+    private void tickRitualBirth(BlockPos pos) {
+        noPhysics=true;setDeltaMovement(Vec3.ZERO);
+        super.tick();
+        setPos(pos.getX()+.5,pos.getY()+.125,pos.getZ()+.5);setDeltaMovement(Vec3.ZERO);
+        if(!(level() instanceof ServerLevel server))return;
+        var state=server.getBlockState(pos);
+        if(!state.is(net.minecraft.world.level.block.Blocks.COMPOSTER)) { discard(); return; }
+        int expected=net.beamex.shamaschizm.ritual.HomunculusRitualRules.compostLevel(birthTicks);
+        if(state.getValue(net.minecraft.world.level.block.ComposterBlock.LEVEL)!=expected){discard();return;}
+        birthTicks++;
+        int next=net.beamex.shamaschizm.ritual.HomunculusRitualRules.compostLevel(birthTicks);
+        if(next!=expected){
+            server.setBlock(pos,state.setValue(net.minecraft.world.level.block.ComposterBlock.LEVEL,next),3);
+            server.playSound(null,pos,SoundEvents.COMPOSTER_EMPTY,net.minecraft.sounds.SoundSource.BLOCKS,.45F,.75F);
+        }
+        if(birthTicks>=net.beamex.shamaschizm.ritual.HomunculusRitualRules.BIRTH_TICKS){
+            // Convert only the four remaining ordinary campfires, preserving their properties.
+            for (int dx : new int[]{-3, 3}) for (int dz : new int[]{-3, 3}) {
+                BlockPos corner = pos.offset(dx, 1, dz);
+                var fire = server.getBlockState(corner);
+                if (fire.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)) {
+                    server.setBlock(corner, net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE.withPropertiesOf(fire), 3);
+                }
+            }
+            entityData.set(BIRTH_POS,Optional.empty());noPhysics=false;
+            setNoAi(false);setNoGravity(false);setPermanentlyInvulnerable(false);
+            command=HomunculusCommand.STAY;anchor=pos;birthTicks=0;
+        }
+    }
     @Override public void tick() {
+        if(isIncubating()){tickRitualBirth(entityData.get(BIRTH_POS).orElseThrow());return;}
         super.tick();
         if (!(level() instanceof ServerLevel server) || !isAlive()) return;
         if (anchor == null) anchor = blockPosition();
         posture();
+        updateRunning();
         if (attackCooldown > 0) attackCooldown--;
         if (tickCount % 10 != 0) return;
         work.updateTickets();
@@ -266,6 +322,8 @@ public final class HomunculusEntity extends PathfinderMob {
     }
     @Override protected void addAdditionalSaveData(ValueOutput out) {
         super.addAdditionalSaveData(out);
+        entityData.get(BIRTH_POS).ifPresent(pos -> out.store("RitualBirthPos",BlockPos.CODEC,pos));
+        out.putInt("RitualBirthTicks",birthTicks);
         out.putInt("HomunculusStage", stage()); out.putInt("Fed", fed); out.putString("Command", command.name());
         if (owner != null) out.putString("Owner", owner.toString());
         out.store("SkinProfile", net.minecraft.world.item.component.ResolvableProfile.CODEC, skinProfile());
@@ -276,6 +334,9 @@ public final class HomunculusEntity extends PathfinderMob {
     }
     @Override protected void readAdditionalSaveData(ValueInput in) {
         super.readAdditionalSaveData(in);
+        entityData.set(BIRTH_POS,in.read("RitualBirthPos",BlockPos.CODEC));
+        birthTicks=Math.clamp(in.getIntOr("RitualBirthTicks",0),0,139);
+        if(isIncubating()){setNoAi(true);setNoGravity(true);setPermanentlyInvulnerable(true);noPhysics=true;}
         entityData.set(STAGE, Math.clamp(in.getIntOr("HomunculusStage", 0), 0, 2));
         fed = Math.clamp(in.getIntOr("Fed", 0), 0, stage() == 0 ? 39 : 59);
         try { owner = UUID.fromString(in.getStringOr("Owner", "")); } catch (IllegalArgumentException ex) { owner = null; }
@@ -289,3 +350,4 @@ public final class HomunculusEntity extends PathfinderMob {
         work.load(in); applyStage();
     }
 }
+

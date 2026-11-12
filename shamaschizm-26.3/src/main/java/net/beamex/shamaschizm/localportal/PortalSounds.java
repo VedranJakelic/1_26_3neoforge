@@ -41,13 +41,13 @@ public final class PortalSounds {
         for(var player:level.players()){
             if(!player.isAlive())continue;
             // Vanilla already sends the original to everyone in this radius. Never add an echo.
-            if(player.position().distanceToSqr(nativePosition)<nativeRadius*nativeRadius)continue;
+            if(net.beamex.shamaschizm.astral.AstralProjection.trackingPosition(player).distanceToSqr(nativePosition)<nativeRadius*nativeRadius)continue;
             var budget=BUDGETS.get(player);long tick=level.getGameTime();
             if(budget!=null&&budget.tick==tick&&budget.count>=24)continue;
             Doorway selected=null,target=null;double shortest=Double.POSITIVE_INFINITY;
             for(var a:doors){
                 if(!a.enabled())continue;var b=byName.get(a.target());if(b==null)continue;
-                var route=PortalSoundPath.find(a,b,player.position().add(0,player.getEyeHeight(),0),soundPos,range);
+                var route=PortalSoundPath.find(a,b,net.beamex.shamaschizm.astral.AstralProjection.viewpoint(player),soundPos,range);
                 if(route!=null&&route.distance()<shortest){shortest=route.distance();selected=a;target=b;}
             }
             if(selected==null)continue;
@@ -57,3 +57,4 @@ public final class PortalSounds {
         }
     }
 }
+

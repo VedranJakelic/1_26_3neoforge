@@ -43,7 +43,7 @@ public final class PortalInteractions {
         ACTIVE.set(new Scope(p,ray.eye(),(float)Math.toDegrees(Math.atan2(-look.x,look.z)),p.getXRot()));
         try{action.run();}finally{if(old==null)ACTIVE.remove();else ACTIVE.set(old);}
     }
-    private static boolean usable(ServerPlayer p){return p.isAlive()&&!p.isSpectator()&&!p.isRemoved()
+    private static boolean usable(ServerPlayer p){return !net.beamex.shamaschizm.astral.AstralProjection.active(p)&&p.isAlive()&&!p.isSpectator()&&!p.isRemoved()
         &&p.level().dimension().equals(Schizm.KEY)&&p.containerMenu==p.inventoryMenu&&!p.isUsingItem();}
     public static void handle(ServerPlayer p,PortalInteractionPacket packet){
         State s=STATES.computeIfAbsent(p,k->new State());
@@ -198,3 +198,4 @@ public final class PortalInteractions {
         return hit.getType()==HitResult.Type.MISS||hit.getBlockPos().equals(pos);
     }
 }
+

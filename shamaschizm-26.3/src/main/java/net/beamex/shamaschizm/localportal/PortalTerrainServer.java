@@ -33,9 +33,9 @@ public final class PortalTerrainServer {
         if(p.tickCount%20!=0&&!(p.tickCount%4==0&&DIRTY.contains(p)))return;
         DIRTY.remove(p);
         var data=DoorwayData.get(p.level());
-        var selected=data.all().stream().filter(d->d.enabled()&&d.distance(p.getEyePosition())>-.5
-                &&d.origin().distanceToSqr(p.position())<24*24)
-                .sorted(Comparator.comparingDouble(d->d.origin().distanceToSqr(p.position()))).limit(2).toList();
+        var selected=data.all().stream().filter(d->d.enabled()&&d.distance(net.beamex.shamaschizm.astral.AstralProjection.viewpoint(p))>-.5
+                &&d.origin().distanceToSqr(net.beamex.shamaschizm.astral.AstralProjection.trackingPosition(p))<24*24)
+                .sorted(Comparator.comparingDouble(d->d.origin().distanceToSqr(net.beamex.shamaschizm.astral.AstralProjection.trackingPosition(p)))).limit(2).toList();
         var sent=SENT.computeIfAbsent(p,k->new HashMap<>());
         var names=new HashSet<String>();
         for(var source:selected){
@@ -117,3 +117,4 @@ public final class PortalTerrainServer {
         cache.put(source.name(),new Cached(tick,result));return result;
     }
 }
+

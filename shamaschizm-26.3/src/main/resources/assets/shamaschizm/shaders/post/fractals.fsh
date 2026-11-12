@@ -2,25 +2,65 @@
 #extension GL_ARB_separate_shader_objects : require
 uniform sampler2D InSampler;
 uniform sampler2D RitualSampler;
+uniform sampler2D HomunculusRitualSampler;
+uniform sampler2D HomunculusSealsSampler;
 layout(std140) uniform FractalConfig { vec4 Fractal; };
 layout(std140) uniform FractalEyes { vec4 Eyes; };
 layout(std140) uniform TripVision { vec4 Vision; };
 layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 fragColor;
 
-void main() {
-    vec3 scene=texture(InSampler,texCoord).rgb;
-    float t=Fractal.x, strength=Fractal.y, danger=Fractal.z;
+// The schematic retains its flowing ink reveal; seals render their original artwork.
+vec3 revealDrawing(vec3 background, sampler2D drawing, vec2 center, vec2 aspect,
+                   vec2 finalSize, vec2 sourceCenter, vec2 sourceSpan,
+                   float progress, float phase, float visibility) {
+    float growth=smoothstep(0.0,14.0/17.0,progress);
+    float readable=smoothstep(2.0/17.0,1.0,progress);
+    vec2 imageSize=finalSize*mix(.012/.86,1.0,growth);
+    vec2 uv=(texCoord-center)*aspect/imageSize+vec2(.5);
+    uv.y=1.0-uv.y;
+    float inside=step(0.0,uv.x)*step(uv.x,1.0)*step(0.0,uv.y)*step(uv.y,1.0);
+    vec2 wave=vec2(sin(uv.y*19.0+Fractal.x*.18),cos(uv.x*17.0-Fractal.x*.16));
+    vec2 formingUV=uv+wave*.055*pow(1.0-readable,2.0);
+    vec2 sampleUV=sourceCenter+(clamp(formingUV,vec2(0),vec2(1))-vec2(.5))*sourceSpan;
+    vec4 art=texture(drawing,sampleUV);
+    float coverage=max(art.r,max(art.g,art.b))*art.a;
+    float lines=smoothstep(.10,.82,coverage)*inside;
+    float emergence=smoothstep(0.0,1.0,progress)*visibility;
+    vec2 imageP=(texCoord-center)*aspect/(imageSize*.62);
+    float backdrop=(1.0-smoothstep(.65,1.2,length(imageP)))*emergence;
+    background*=1.0-backdrop*.82;
+    vec3 ink=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.98),readable);
+    return mix(background,ink,clamp(lines*emergence,0.0,1.0));
+}
+// Direct RGBA artwork: no coverage reconstruction, recoloring, or dark halo.
+vec3 revealSymbol(vec3 background, vec2 center, vec2 aspect, vec2 sourceCenter,
+                  float progress, float visibility, float spin) {
+    float growth=smoothstep(0.0,14.0/17.0,progress);
+    vec2 local=(texCoord-center)*aspect/(.36*mix(.012/.86,1.0,growth));
+    float angle=spin*(1.0-smoothstep(0.0,1.0,progress));
+    float c=cos(angle), s=sin(angle);
+    local=mat2(c,-s,s,c)*local;
+    vec2 uv=vec2(local.x,-local.y)+vec2(.5);
+    float inside=step(0.0,uv.x)*step(uv.x,1.0)*step(0.0,uv.y)*step(uv.y,1.0);
+    vec4 art=texture(HomunculusSealsSampler,sourceCenter+(clamp(uv,0.0,1.0)-.5)*vec2(.244,.240));
+    // Color-key only the residual black background in the supplied texture.
+    // Keep the actual RGB artwork, including its original grey linework.
+    float nonBlack=smoothstep(0.0,.04,max(art.r,max(art.g,art.b)));
+    float alpha=art.a*nonBlack*inside*smoothstep(0.0,1.0,progress)*visibility;
+    return mix(background,art.rgb,clamp(alpha,0.0,1.0));
+}
+vec3 renderPattern(vec2 center, float pin, float visionAge, float visionOpacity) {
+    float t=Fractal.x, strength=Fractal.y;
     vec2 size=vec2(textureSize(InSampler,0));
     vec2 aspect=vec2(size.x/size.y,1.0);
-    float pin=smoothstep(0.0,6.0,Vision.z)*Vision.w;
-    vec2 center=mix(vec2(.5),Vision.xy,pin);
     vec2 p=(texCoord-center)*aspect*2.0;
     vec2 visionP=p;
-    float opening=smoothstep(0.0,4.0,Vision.z)*Vision.w;
-    float morph=smoothstep(9.0,16.0,Vision.z);
-    float rise=smoothstep(16.0,23.0,Vision.z);
-    float reveal=smoothstep(23.0,40.0,Vision.z);
+    float opening=smoothstep(0.0,4.0,visionAge)*visionOpacity;
+    float morph=smoothstep(9.0,16.0,visionAge);
+    bool homunculus=Eyes.z>.5;
+    float rise=homunculus?smoothstep(23.0,35.0,visionAge):smoothstep(16.0,23.0,visionAge);
+    float reveal=smoothstep(23.0,40.0,visionAge);
     vec2 ce=visionP/.65;
     float centralSupport=1.0-smoothstep(.85,1.6,length(ce));
     float centralLid=max(.17,.42*sqrt(max(0.0,1.0-ce.x*ce.x)));
@@ -106,7 +146,9 @@ void main() {
     float centralRim=exp(-pow((abs(ce.y)-eyeHeight)/.04,2.0))*(1.0-smoothstep(.94,1.03,abs(ce.x)));
     float irisRadius=length(ce);
     float irisShade=(1.0-smoothstep(.27,.32,irisRadius))*.45+(1.0-smoothstep(.10,.14,irisRadius))*.50;
-    pattern*=1.0-clamp((centralRim*.55+centralAperture*irisShade*(1.0-morph))*opening*(1.0-rise),0.0,.95);
+    pattern*=1.0-clamp((centralRim*.55+centralAperture*irisShade*(1.0-(homunculus?rise:morph)))*opening*(1.0-rise),0.0,.95);
+    if(visionOpacity>0.0) {
+    if (!homunculus) {
     // Match the rising seal exactly to its position in the final complete image.
     vec2 imageSize=vec2(929.0/780.0,1.0)*.80;
     vec2 imageCenter=center-vec2(0,.05);
@@ -117,7 +159,7 @@ void main() {
     vec2 sealUV=vec2(.506,.231)+vec2(sealQ.x,-sealQ.y)*vec2(.147,.173);
     float seal=texture(RitualSampler,clamp(sealUV,vec2(0),vec2(1))).r;
     seal*=1.0-smoothstep(.98,1.06,length(sealQ));
-    float sealAmount=morph*Vision.w*(1.0-reveal);
+    float sealAmount=morph*visionOpacity*(1.0-reveal);
     vec3 apparition=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.96),morph);
     pattern=mix(pattern,apparition,clamp(seal*sealAmount,0.0,1.0));
     // Distorted colored fragments settle into the original, unmodified ritual.
@@ -126,15 +168,49 @@ void main() {
     float inside=step(0.0,imageUV.x)*step(imageUV.x,1.0)*step(0.0,imageUV.y)*step(imageUV.y,1.0);
     vec2 wave=vec2(sin(imageUV.y*31.0+t*.24),cos(imageUV.x*27.0-t*.21));
     vec2 formingUV=imageUV+wave*.045*pow(1.0-reveal,2.0);
-    float resolution=mix(12.0,929.0,pow(reveal,3.0));
-    formingUV=mix((floor(formingUV*resolution)+.5)/resolution,formingUV,reveal);
+    // Continuous UV deformation; no pixel-grid quantization.
     float lines=texture(RitualSampler,clamp(formingUV,vec2(0),vec2(1))).r*inside;
-    float emergence=reveal*Vision.w;
+    float emergence=reveal*visionOpacity;
     vec2 imageP=(texCoord-imageCenter)*aspect/(imageSize*.65);
     float backdrop=(1.0-smoothstep(.7,1.25,length(imageP)))*emergence;
     pattern*=1.0-backdrop*.72;
     vec3 ink=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.98),reveal);
     pattern=mix(pattern,ink,clamp(lines*emergence,0.0,1.0));
+    } else {
+        vec2 sources[4]=vec2[4](vec2(.198,.178),vec2(.815,.176),vec2(.195,.818),vec2(.821,.816));
+        for(int i=0;i<4;i++) {
+            vec2 side=vec2((i==0||i==2)?-1.0:1.0,i<2?1.0:-1.0);
+            vec2 offset=side*mix(vec2(.32,.22),vec2(.49,.30),rise);
+            vec2 sealCenter=center+offset/aspect;
+            // Original seals grow and turn upright, with alternating rotation directions.
+            float progress=clamp((visionAge-(6.0+float(i)))/12.0,0.0,1.0);
+            pattern=revealSymbol(pattern,sealCenter,aspect,sources[i],progress,visionOpacity,
+                    (i%2==0?1.0:-1.0)*1.5707963);
+        }
+        pattern=revealDrawing(pattern,HomunculusRitualSampler,center,aspect,
+                vec2(1199.0/1312.0,1.0)*.86,vec2(.5),vec2(1.0),
+                clamp((visionAge-23.0)/17.0,0.0,1.0),phase,visionOpacity);
+    }
+    }
+    return pattern;
+}
+void main() {
+    vec3 scene=texture(InSampler,texCoord).rgb;
+    float strength=Fractal.y, danger=Fractal.z;
+    vec2 size=vec2(textureSize(InSampler,0));
+    vec2 aspect=vec2(size.x/size.y,1.0);
+    float pin=smoothstep(0.0,6.0,Eyes.w);
+    vec2 anchor=mix(vec2(.5),Vision.xy,pin);
+    // Let an off-screen apparition leave the view, rather than dragging the entire
+    // background toward a perspective singularity or freezing its center at a clamp.
+    vec2 outside=max(abs(anchor-vec2(.5))-vec2(.5),vec2(0))*aspect;
+    float visibility=1.0-smoothstep(.15,.55,length(outside));
+    float blend=clamp(Vision.w*visibility,0.0,1.0);
+    vec3 normal=vec3(0), anchored=vec3(0);
+    if(blend<1.0)normal=renderPattern(vec2(.5),0.0,0.0,0.0);
+    if(blend>0.0)anchored=renderPattern(anchor,pin,Vision.z,1.0);
+    // Crossfade layers, not their center coordinates. The eye never slides to the reticle.
+    vec3 pattern=mix(clamp(normal,0.0,1.0),clamp(anchored,0.0,1.0),blend);
     float luminance=dot(scene,vec3(0.2126,0.7152,0.0722));
     // At full health there is no blanket overlay: only genuinely dark pixels reveal it.
     float shadow=1.0-smoothstep(0.015,0.20,luminance);

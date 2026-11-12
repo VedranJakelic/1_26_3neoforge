@@ -26,6 +26,7 @@ public final class DoorwayTraversal {
 
     @SubscribeEvent public static void tick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if(net.beamex.shamaschizm.astral.AstralProjection.active(player))return;
         if (!player.level().dimension().equals(Schizm.KEY) || !player.isAlive()) {
             if (TRACKS.remove(player) != null) PacketDistributor.sendToPlayer(player, new DoorwayNetwork.State(List.of()));
             return;
@@ -205,3 +206,4 @@ public final class DoorwayTraversal {
     }
 
 }
+

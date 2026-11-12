@@ -26,7 +26,8 @@ public final class TripVisionState {
         if(!anchored&&cooldown<=0&&staring&&charge>.65F&&power>3.5F){anchored=true;interrupted=false;age=0;opacity=0;}
         if(!anchored)return;
         if(!active||!aligned||darkness<.4F||power<2.6F)interrupted=true;
-        if(interrupted){opacity=Math.max(0,opacity-dt/2);if(opacity<=0){anchored=false;age=0;cooldown=8;}}
+        // Let the normal fractal return gradually after looking away (five seconds).
+        if(interrupted){opacity=Math.max(0,opacity-dt/5);if(opacity<=0){anchored=false;age=0;cooldown=8;}}
         else {age=Math.min(40,age+dt);opacity=Math.min(1,opacity+dt/2);}
     }
 }

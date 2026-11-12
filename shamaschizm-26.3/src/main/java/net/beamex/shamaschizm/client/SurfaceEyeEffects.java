@@ -18,22 +18,29 @@ import java.nio.ByteOrder;
 /** Depth-projected eyes: applied before scene distortions and before the HUD. */
 public final class SurfaceEyeEffects {
     private static final Matrix4f PROJECTION = new Matrix4f();
-    private static boolean captured;
+    private static boolean captured, directionProjectionValid;
+    private static final Matrix4f DIRECTION_PROJECTION = new Matrix4f();
     private static final ByteBuffer DATA = ByteBuffer.allocateDirect(352).order(ByteOrder.nativeOrder());
     private SurfaceEyeEffects() {}
     public static net.minecraft.world.phys.Vec3 projectDirection(net.minecraft.world.phys.Vec3 direction) {
-        var camera=Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
-        var p=new org.joml.Vector3f((float)direction.x*64,(float)direction.y*64,(float)direction.z*64);
-        new Matrix4f(PROJECTION).mul(camera.viewRotationMatrix).transformProject(p);
-        return new net.minecraft.world.phys.Vec3(p.x*.5+.5,p.y*.5+.5,1);
+        if(!directionProjectionValid)return new net.minecraft.world.phys.Vec3(0,0,0);
+        var p=new org.joml.Vector4f((float)direction.x,(float)direction.y,(float)direction.z,0);
+        DIRECTION_PROJECTION.transform(p);
+        if(!Float.isFinite(p.w)||p.w<=.001F)return new net.minecraft.world.phys.Vec3(0,0,0);
+        return new net.minecraft.world.phys.Vec3(p.x/p.w*.5+.5,p.y/p.w*.5+.5,1);
     }
-    public static void beginFrame() { captured = false; }
+    public static void beginFrame() { captured = false; directionProjectionValid = false; }
     public static void captureProjection(Matrix4f matrix) { PROJECTION.set(matrix); captured = true; }
     public static void render(RenderTarget target, GraphicsResourceAllocator allocator, float time, float intensity) {
         var mc = Minecraft.getInstance();
-        if (!captured || mc.level == null || mc.player == null || intensity <= 0.001F) return;
+        if (!captured || mc.level == null || mc.player == null) return;
         captured = false;
         var camera = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+        // Snapshot the world projection AND this frame's view before render3dHud changes them.
+        // Later projection-buffer calls must not change the post-HUD ritual anchor.
+        DIRECTION_PROJECTION.set(PROJECTION).mul(camera.viewRotationMatrix);
+        directionProjectionValid = true;
+        if (intensity <= 0.001F) return;
         var pos = camera.pos;
         // Portal composites carry doorway-plane depth, not remote geometry depth.
         // Exclude visible apertures instead of drawing false decals over windows.

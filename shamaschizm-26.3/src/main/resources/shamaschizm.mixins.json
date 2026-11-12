@@ -17,7 +17,13 @@
     "PortalExplosionSoundMixin",
     "SchizmDeathMessageMixin",
     "MaidenSpawnEggFacingMixin",
-    "MaidenSummonFacingMixin"
+    "MaidenSummonFacingMixin",
+    "AstralSleepMixin",
+    "AstralNightMixin",
+    "AstralChunkMixin",
+    "AstralEntityTrackingMixin",
+    "AstralActionsMixin",
+    "AstralSoundPositionMixin"
   ],
   "client": [
     "PortalSkyDarknessMixin",
@@ -42,7 +48,9 @@
     "PortalSoundContinuityMixin",
     "TatteredBannerRenderStateMixin",
     "TatteredBannerRendererMixin",
-    "SurfaceEyeProjectionMixin"
+    "SurfaceEyeProjectionMixin",
+    "AstralMouseMixin",
+    "AstralCameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1

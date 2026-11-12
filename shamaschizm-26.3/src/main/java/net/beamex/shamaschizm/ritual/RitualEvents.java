@@ -92,6 +92,11 @@ public final class RitualEvents {
         // The original center is unrestricted once activated: a crafting table
         // may replace the anchor. Completion is recognized by soul campfires.
         if (!complete && !level.getBlockState(anchor).is(Blocks.RESPAWN_ANCHOR)) return false;
+        return hasLitRing(level, anchor, complete);
+    }
+
+    /** Shared ring only; the origin is one block above candle level. */
+    static boolean hasLitRing(Level level, BlockPos anchor, boolean complete) {
         for (int[] p : CANDLES) {
             BlockState state = level.getBlockState(anchor.offset(p[0],p[1],p[2]));
             if (!(state.getBlock() instanceof CandleBlock) || !state.getValue(CandleBlock.LIT)) return false;
@@ -153,3 +158,4 @@ public final class RitualEvents {
         event.put(RitualRegistry.QUESTION_VILLAGER.get(), Villager.createAttributes().build());
     }
 }
+

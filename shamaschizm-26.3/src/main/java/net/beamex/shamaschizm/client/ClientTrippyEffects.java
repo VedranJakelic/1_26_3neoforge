@@ -1,5 +1,6 @@
 package net.beamex.shamaschizm.client;
 
+import net.beamex.shamaschizm.astral.AstralClient;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
@@ -56,13 +57,14 @@ public final class ClientTrippyEffects {
         if (mc.player == null || mc.level == null || mc.isPaused()) return;
         TripVisionClient.tick();
         var player = mc.player;
-        Vec3 position = player.position();
+        var viewer = AstralClient.active() ? mc.getCameraEntity() : player;
+        Vec3 position = viewer.position();
         float targetMotion = 0;
         float targetTurn = 0;
         if (previousPosition != null) {
             double travel = position.distanceTo(previousPosition);
-            float turn = Math.abs(Mth.wrapDegrees(player.getYRot() - previousYaw))
-                    + Math.abs(player.getXRot() - previousPitch);
+            float turn = Math.abs(Mth.wrapDegrees(viewer.getYRot() - previousYaw))
+                    + Math.abs(viewer.getXRot() - previousPitch);
             if (travel > 4) historyValid = eyeHistoryValid = false; // Teleports must not drag the previous scene along.
             else {
                 targetMotion = Mth.clamp((float)(travel / 0.30) + turn / 18F, 0F, 1F);
@@ -71,13 +73,13 @@ public final class ClientTrippyEffects {
         }
         motion += (targetMotion - motion) * 0.25F;
         headTurn += (targetTurn - headTurn) * 0.35F;
-        previousPosition = position; previousYaw = player.getYRot(); previousPitch = player.getXRot();
+        previousPosition = position; previousYaw = viewer.getYRot(); previousPitch = viewer.getXRot();
         if (intensity <= 0) historyValid = eyeHistoryValid = false;
     }
 
     public static void renderSurfaces(RenderTarget target, GraphicsResourceAllocator allocator) {
         var mc = Minecraft.getInstance();
-        if (mc.player != null && mc.getCameraEntity() == mc.player)
+        if (mc.player != null && (mc.getCameraEntity() == mc.player || AstralClient.active()))
             SurfaceEyeEffects.render(target, allocator, (float)time, intensity);
     }
 
@@ -87,7 +89,7 @@ public final class ClientTrippyEffects {
         float dt = lastFrame == 0 ? 1F / 60F : (float)Math.min(0.1, (now - lastFrame) / 1e9);
         lastFrame = now;
         if (mc.player == null || mc.level != lastLevel || intensity <= 0.001F
-                || mc.getCameraEntity() != mc.player) { historyValid = eyeHistoryValid = false; return; }
+                || (mc.getCameraEntity() != mc.player && !AstralClient.active())) { historyValid = eyeHistoryValid = false; return; }
 
         PostChain chain = mc.getShaderManager().getPostChain(EFFECT, LevelTargetBundle.MAIN_TARGETS);
         if (chain == null) { historyValid = eyeHistoryValid = false; return; }
@@ -114,7 +116,7 @@ public final class ClientTrippyEffects {
         boolean alive = mc.player.isAlive();
         boolean active = alive && mc.player.hasEffect(ModEffects.TRIPPING);
         if (!mc.isPaused() || !active) {
-            intensity = Mth.approach(intensity, active ? TripVisionClient.overall() : 0F, dt/(active ? 2F : 6F));
+            intensity = Mth.approach(intensity, active ? (AstralClient.active()?1F:TripVisionClient.overall()) : 0F, dt/(active ? 2F : 6F));
             time += dt;
             // Integrate speed rather than multiplying time: stopping a turn never snaps the pattern back.
             fractalRotation += dt * (0.035 + (alive ? headTurn : 0F) * 0.9);
@@ -127,6 +129,17 @@ public final class ClientTrippyEffects {
         } else if (!alive && intensity > 0) severity = 1F;
         soundGain = Mth.approach(soundGain, 1F-intensity*severity, dt/3F);
         if (intensity <= 0.001F) { severity = 0; historyValid = eyeHistoryValid = false; return; }
+        if(AstralClient.active()) {
+            PostChain astral=mc.getShaderManager().getPostChain(Shamaschizm.id("astral_projection"),LevelTargetBundle.MAIN_TARGETS);
+            if(astral!=null){
+                Vec3 sun=AstralClient.projected(false),moon=AstralClient.projected(true);
+                uniforms(astral,"AstralConfig",(float)time,intensity,AstralClient.seconds(),AstralClient.danger());
+                uniforms(astral,"AstralSun",(float)sun.x,(float)sun.y,(float)sun.z,0F);
+                uniforms(astral,"AstralMoon",(float)moon.x,(float)moon.y,(float)moon.z,0F);
+                astral.process(target,allocator);
+            }
+            return; // Neither ritual reveal runs during astral projection.
+        }
         PostChain chain = mc.getShaderManager().getPostChain(OVERLAY, LevelTargetBundle.MAIN_TARGETS);
         if (chain == null) return;
         // Form scene eyes first; the fractal shader forms its own coherent eyes.
@@ -146,7 +159,7 @@ public final class ClientTrippyEffects {
         previousEyeChain = eyes;
         eyeHistoryValid = eyes != null;
         uniforms(chain, "FractalConfig", (float)time, intensity, severity, (float)fractalRotation);
-        uniforms(chain, "FractalEyes", eyeDepth, TripVisionClient.density(), 0F, 0F);
+        uniforms(chain, "FractalEyes", eyeDepth, TripVisionClient.density(), TripVisionClient.ritual(), TripVisionClient.anchorAge());
         Vec3 anchor = TripVisionClient.screenAnchor();
         uniforms(chain, "TripVision", (float)anchor.x, (float)anchor.y,
                 TripVisionClient.age(), TripVisionClient.opacity()*(float)anchor.z);
@@ -169,4 +182,3 @@ public final class ClientTrippyEffects {
         }
     }
 }
-

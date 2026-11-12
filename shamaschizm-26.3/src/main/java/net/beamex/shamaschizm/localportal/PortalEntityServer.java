@@ -21,9 +21,9 @@ public final class PortalEntityServer {
         if(!(event.getEntity() instanceof ServerPlayer player)||!player.level().dimension().equals(Schizm.KEY)
                 ||player.tickCount%4!=0)return;
         var level=player.level();var data=DoorwayData.get(level);
-        var selected=data.all().stream().filter(d->d.enabled()&&d.distance(player.getEyePosition())>-.5
-                &&d.origin().distanceToSqr(player.position())<24*24)
-                .sorted(Comparator.comparingDouble(d->d.origin().distanceToSqr(player.position()))).limit(2).toList();
+        var selected=data.all().stream().filter(d->d.enabled()&&d.distance(net.beamex.shamaschizm.astral.AstralProjection.viewpoint(player))>-.5
+                &&d.origin().distanceToSqr(net.beamex.shamaschizm.astral.AstralProjection.trackingPosition(player))<24*24)
+                .sorted(Comparator.comparingDouble(d->d.origin().distanceToSqr(net.beamex.shamaschizm.astral.AstralProjection.trackingPosition(player)))).limit(2).toList();
         for(var source:selected) {
             var target=data.get(source.target());if(target==null||!target.enabled()||!target.target().equals(source.name()))continue;
             double side=target.width()/2+16;
@@ -55,3 +55,4 @@ public final class PortalEntityServer {
         }
     }
 }
+

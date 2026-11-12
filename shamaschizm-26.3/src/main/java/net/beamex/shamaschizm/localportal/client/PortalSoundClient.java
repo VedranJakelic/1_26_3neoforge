@@ -64,9 +64,9 @@ public final class PortalSoundClient {
                         ? entity.position() : PortalEntityScene.soundPosition(packet.source(),packet.entityId(),packet.entityUuid());
                 if(moving!=null)lastPosition=moving;
             }
-            var route=source==null||target==null?null:PortalSoundPath.find(source,target,mc.player.getEyePosition(),lastPosition,packet.range());
+            var route=source==null||target==null?null:PortalSoundPath.find(source,target,mc.gameRenderer.mainCamera().position(),lastPosition,packet.range());
             // Continue an already playing sound normally when the listener crosses to its room.
-            double direct=mc.player.getEyePosition().distanceTo(lastPosition);
+            double direct=mc.gameRenderer.mainCamera().position().distanceTo(lastPosition);
             if(!initial&&direct<packet.range()&&(route==null||direct<route.distance())){
                 x=lastPosition.x;y=lastPosition.y;z=lastPosition.z;
                 float desired=PortalSoundPath.gain(packet.volume(),direct,packet.range());
@@ -84,3 +84,4 @@ public final class PortalSoundClient {
         }
     }
 }
+

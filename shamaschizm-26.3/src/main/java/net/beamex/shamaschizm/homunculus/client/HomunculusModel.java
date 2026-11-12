@@ -3,11 +3,11 @@ import net.beamex.shamaschizm.Shamaschizm;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.*;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 
 /** Supplied Blockbench geometry, UVs, rotations and walk keyframes. */
-public final class HomunculusModel extends EntityModel<AvatarRenderState> {
+public final class HomunculusModel extends EntityModel<LivingEntityRenderState> {
     public static final ModelLayerLocation NORMAL=new ModelLayerLocation(Shamaschizm.id("homunculus"),"main");
     public static final ModelLayerLocation SLIM=new ModelLayerLocation(Shamaschizm.id("homunculus"),"slim");
     private final ModelPart tiny;
@@ -36,7 +36,7 @@ public final class HomunculusModel extends EntityModel<AvatarRenderState> {
         part2.addOrReplaceChild("cube9",CubeListBuilder.create().texOffs(30,0).addBox(-2.000000F,0.000000F,-3.000000F,4.000000F,0.000000F,4.000000F,new CubeDeformation(0.000000F)),PartPose.offsetAndRotation(2.000000F,0.000000F,0.000000F,0.000000F,0.000000F,0.000000F));
         return LayerDefinition.create(mesh,64,64);
     }
-    @Override public void setupAnim(AvatarRenderState state){
+    @Override public void setupAnim(LivingEntityRenderState state){
         super.setupAnim(state);
         tiny.visible=true;
         float time=(state.walkAnimationPos*.35F)%3F, weight=Math.min(1F,state.walkAnimationSpeed*3F);
@@ -54,3 +54,4 @@ public final class HomunculusModel extends EntityModel<AvatarRenderState> {
         p.xRot+=Mth.lerp(f,a[1],b[1])*weight;p.yRot+=Mth.lerp(f,a[2],b[2])*weight;p.zRot+=Mth.lerp(f,a[3],b[3])*weight;
     }
 }
+

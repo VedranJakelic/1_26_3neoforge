@@ -8,6 +8,13 @@
         { "min_y": 151, "multiplier": 1.0 }
       ]
     },
+    "relic": {
+      "y_modifiers": [
+        { "max_y": 89, "multiplier": 2.0 },
+        { "min_y": 90, "max_y": 150, "multiplier": 1.0 },
+        { "min_y": 151, "multiplier": 0 }
+      ]
+    },
     "moss": {
       "y_modifiers": [
         { "max_y": 109, "multiplier": 0.2 },

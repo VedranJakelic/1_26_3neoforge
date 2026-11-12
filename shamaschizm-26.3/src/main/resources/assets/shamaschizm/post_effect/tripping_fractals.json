@@ -17,6 +17,20 @@
           "width": 929,
           "height": 780,
           "bilinear": true
+        },
+        {
+          "sampler_name": "HomunculusRitual",
+          "location": "shamaschizm:homunculus_ritual_vision",
+          "width": 1199,
+          "height": 1312,
+          "bilinear": true
+        },
+        {
+          "sampler_name": "HomunculusSeals",
+          "location": "shamaschizm:homunculus_ritual_seals",
+          "width": 992,
+          "height": 1012,
+          "bilinear": true
         }
       ],
       "output": "swap",

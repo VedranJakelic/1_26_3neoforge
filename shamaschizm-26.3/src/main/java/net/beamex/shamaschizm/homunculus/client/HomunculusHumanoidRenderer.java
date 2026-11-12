@@ -20,6 +20,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.*;
 
 final class HomunculusHumanoidRenderer extends MobRenderer<HomunculusEntity,AvatarRenderState,net.minecraft.client.model.player.PlayerModel> {
+    static final class State extends AvatarRenderState { int stage; }
     // Only growth stages one and two are sent to this renderer.
     // The newborn uses a different renderer and a model without any player geometry.
     private final net.minecraft.client.model.player.PlayerModel normal,slim;
@@ -34,13 +35,13 @@ final class HomunculusHumanoidRenderer extends MobRenderer<HomunculusEntity,Avat
         addLayer(new HumanoidArmorLayer<>(this,ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR,context.getModelSet(),
                 part -> new HumanoidModel<AvatarRenderState>(part)),context.getEquipmentRenderer()));
     }
-    @Override public AvatarRenderState createRenderState(){return new HomunculusRenderer.State();}
+    @Override public AvatarRenderState createRenderState(){return new State();}
     @Override public Identifier getTextureLocation(AvatarRenderState state){
         return state.skin.body().texturePath();
     }
     @Override public void extractRenderState(HomunculusEntity mob,AvatarRenderState state,float partial){
         super.extractRenderState(mob,state,partial);
-        HumanoidMobRenderer.extractHumanoidRenderState(mob,state,partial,itemModelResolver);((HomunculusRenderer.State)state).stage=mob.stage();
+        HumanoidMobRenderer.extractHumanoidRenderState(mob,state,partial,itemModelResolver);((State)state).stage=mob.stage();
         GameProfile profile=mob.skinProfile().partialProfile();
         state.skin=mob.stage()==0?DefaultPlayerSkin.getDefaultSkin():skins.computeIfAbsent(profile,
                 p->Minecraft.getInstance().getSkinManager().createLookup(p,false)).get();
@@ -52,21 +53,22 @@ final class HomunculusHumanoidRenderer extends MobRenderer<HomunculusEntity,Avat
         model=state.skin.model()==PlayerModelType.SLIM?slim:normal;
         super.submit(state,pose,collector,camera);
     }
-    @Override protected boolean shouldRenderLayers(AvatarRenderState state){return ((HomunculusRenderer.State)state).stage>0;}
+    @Override protected boolean shouldRenderLayers(AvatarRenderState state){return ((State)state).stage>0;}
     @Override protected void scale(AvatarRenderState state,PoseStack pose){
-        float scale=((HomunculusRenderer.State)state).stage==1?.5F:((HomunculusRenderer.State)state).stage==2?1.1F:1;
+        float scale=((State)state).stage==1?.5F:((State)state).stage==2?1.1F:1;
         pose.scale(scale,scale,scale);
     }
     @Override protected void setupRotations(AvatarRenderState state,PoseStack pose,float bodyRot,float scale){
         super.setupRotations(state,pose,bodyRot,scale);
-        if(((HomunculusRenderer.State)state).stage==2&&state.pose==Pose.SWIMMING){pose.rotateDegrees(Axis.XP,-90);pose.translate(0,-1,.25);}
+        if(((State)state).stage==2&&state.pose==Pose.SWIMMING){pose.rotateDegrees(Axis.XP,-90);pose.translate(0,-1,.25);}
     }
     private static final class GrownModel extends net.minecraft.client.model.player.PlayerModel {
         GrownModel(net.minecraft.client.model.geom.ModelPart root,boolean slim){super(root,slim);}
         @Override public void setupAnim(AvatarRenderState state){
             super.setupAnim(state);
-            if(((HomunculusRenderer.State)state).stage==1)head.xScale=head.yScale=head.zScale=1.25F;
+            if(((State)state).stage==1)head.xScale=head.yScale=head.zScale=1.25F;
         }
     }
 
 }
+
