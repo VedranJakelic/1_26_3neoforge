@@ -1,0 +1,15 @@
+{
+  "parent": "item/amethyst_bud",
+  "textures": {
+    "layer0": "shamaschizm:block/diamond_cluster"
+  },
+  "display": {
+    "fixed": {
+      "translation": [
+        0,
+        4,
+        0
+      ]
+    }
+  }
+}

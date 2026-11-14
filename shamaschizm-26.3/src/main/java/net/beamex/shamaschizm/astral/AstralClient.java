@@ -1,6 +1,5 @@
 package net.beamex.shamaschizm.astral;
 import net.beamex.shamaschizm.Shamaschizm;
-import net.beamex.shamaschizm.client.SurfaceEyeEffects;
 import net.beamex.shamaschizm.client.TripVisionClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.CameraType;
@@ -27,7 +26,13 @@ public final class AstralClient {
   if(!p.active()){if(p.session()==session)reset();return;}if(!mc.player.isAlive())return;
   if(ghost==null||p.session()!=session){
    reset();world=mc.level;session=p.session();oldCamera=mc.options.getCameraType();mc.options.setCameraType(CameraType.FIRST_PERSON);
-   ghost=new ArmorStand(mc.level,p.x(),p.y(),p.z()){@Override public boolean isSpectator(){return true;}};
+   ghost=new ArmorStand(mc.level,p.x(),p.y(),p.z()){
+    @Override public boolean isSpectator(){return true;}
+    // LivingEntity normally reads yHeadRot here. This unticked camera carrier has
+    // no head controller: use the angles changed by Entity.turn and portal snaps.
+    @Override public float getViewYRot(float partialTick){return getYRot(partialTick);}
+    @Override public float getViewXRot(float partialTick){return getXRot(partialTick);}
+   };
    ghost.setInvisible(true);ghost.setNoGravity(true);ghost.absSnapTo(p.x(),p.y()-ghost.getEyeHeight(),p.z(),p.yaw(),p.pitch());mc.setCameraEntity(ghost);
    var screen=mc.gui.screen();if(screen!=null&&(screen instanceof AbstractContainerScreen||screen.getClass().getSimpleName().contains("InBed")))mc.gui.setScreen(null);
    TripVisionClient.reset();
@@ -47,7 +52,15 @@ public final class AstralClient {
  }
  public static void turn(double x,double y){if(ghost!=null)ghost.turn(x,y);}
  public static Vec3 celestial(boolean moon){var mc=Minecraft.getInstance();float angle=mc.gameRenderer.mainCamera().attributeProbe().getValue(moon?EnvironmentAttributes.MOON_ANGLE:EnvironmentAttributes.SUN_ANGLE,1F);double a=Math.toRadians(angle);return new Vec3(-Math.sin(a),Math.cos(a),0);}
- public static Vec3 projected(boolean moon){return SurfaceEyeEffects.projectDirection(celestial(moon));}
+ public static Vec3 projected(boolean moon){
+  // Use the main world camera directly; the optional surface-eye pass may not run.
+  var camera=Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+  Vec3 direction=celestial(moon);
+  var clip=new org.joml.Vector4f((float)direction.x,(float)direction.y,(float)direction.z,0);
+  camera.viewRotationMatrix.transform(clip);camera.projectionMatrix.transform(clip);
+  if(!Float.isFinite(clip.w)||clip.w<=.001F)return Vec3.ZERO;
+  return new Vec3(clip.x/clip.w*.5+.5,clip.y/clip.w*.5+.5,1);
+ }
  @SubscribeEvent public static void hand(RenderHandEvent e){if(active())e.setCanceled(true);}
  @SubscribeEvent public static void hud(RenderGuiLayerEvent.Pre e){if(active())e.setCanceled(true);}
  @SubscribeEvent public static void screen(ScreenEvent.Opening e){if(active()&&e.getNewScreen()!=null&&(e.getNewScreen() instanceof AbstractContainerScreen||e.getNewScreen().getClass().getSimpleName().contains("InBed")))e.setCanceled(true);}

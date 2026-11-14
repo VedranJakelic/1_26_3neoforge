@@ -11,12 +11,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -115,12 +113,14 @@ public final class AstralProjection {
   s.returnTicks=align?s.returnTicks+1:0;if(s.returnTicks>=AstralRules.RETURN_TICKS){finish(p,true);return;}
   boolean gaze=false;
   for(boolean moon:new boolean[]{false,true}){
-   Vec3 celestial=celestial(s.level,moon);
-   if(celestial.y>0&&look.dot(celestial)>.9925&&s.level.clip(new ClipContext(s.position,s.position.add(celestial.scale(256)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,p)).getType()==HitResult.Type.MISS)gaze=true;
+   Vec3 celestial=celestial(s.level,s.position,moon);
+   // Astral celestial visions remain visible through terrain and below the horizon.
+   // Match the world-anchored glow, not the sleeping body's access to open sky.
+   if(look.dot(celestial)>.985)gaze=true;
   }
   s.danger=AstralRules.gaze(s.danger,gaze);if(s.danger>=.9999F){kill(p);return;}send(p,s,crossed);
  }
- public static Vec3 celestial(ServerLevel level,boolean moon){float a=level.environmentAttributes().getDimensionValue(moon?EnvironmentAttributes.MOON_ANGLE:EnvironmentAttributes.SUN_ANGLE);double r=Math.toRadians(a);return new Vec3(-Math.sin(r),Math.cos(r),0);}
+ public static Vec3 celestial(ServerLevel level,Vec3 position,boolean moon){float a=level.environmentAttributes().getValue(moon?EnvironmentAttributes.MOON_ANGLE:EnvironmentAttributes.SUN_ANGLE,position);double r=Math.toRadians(a);return new Vec3(-Math.sin(r),Math.cos(r),0);}
  private static void tickets(ServerPlayer p,Session s){
   ChunkPos center=chunk(s.position);Set<Long> wanted=new HashSet<>();
   for(int x=-4;x<=4;x++)for(int z=-4;z<=4;z++)wanted.add(new ChunkPos(center.x()+x,center.z()+z).pack());

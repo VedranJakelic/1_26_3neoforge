@@ -56,6 +56,78 @@
               0
             ]
           }
+        ],
+        "AstralInverse0": [
+          {
+            "name": "Inverse0",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "AstralInverse1": [
+          {
+            "name": "Inverse1",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "AstralInverse2": [
+          {
+            "name": "Inverse2",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "AstralInverse3": [
+          {
+            "name": "Inverse3",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "AstralSunDirection": [
+          {
+            "name": "SunDirection",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "AstralMoonDirection": [
+          {
+            "name": "MoonDirection",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
         ]
       }
     },

@@ -76,6 +76,7 @@ public final class RitualEvents {
                     .setValue(CampfireBlock.FACING, old.getValue(CampfireBlock.FACING))
                     .setValue(CampfireBlock.LIT, true), 3);
         }
+        RitualCompletionData.record(server, pos);
         server.sendParticles(ParticleTypes.EXPLOSION, pos.getX() + 0.5D, pos.getY() + 0.5D,
                 pos.getZ() + 0.5D, 4, 0.6D, 0.5D, 0.6D, 0);
         server.sendParticles(ParticleTypes.SOUL, pos.getX() + 0.5D, pos.getY() + 0.5D,
@@ -87,16 +88,13 @@ public final class RitualEvents {
     }
 
     /** Before activation: regular lit campfires, anchor and lit candles. */
-    private static boolean isRitual(Level level, BlockPos anchor, boolean complete) {
+    public static boolean isRitual(Level level, BlockPos anchor, boolean complete) {
+        if (complete && level instanceof ServerLevel server
+                && !RitualCompletionData.contains(server, anchor)) return false;
         if (!level.getBlockState(anchor.below()).is(Blocks.CRYING_OBSIDIAN)) return false;
         // The original center is unrestricted once activated: a crafting table
         // may replace the anchor. Completion is recognized by soul campfires.
         if (!complete && !level.getBlockState(anchor).is(Blocks.RESPAWN_ANCHOR)) return false;
-        return hasLitRing(level, anchor, complete);
-    }
-
-    /** Shared ring only; the origin is one block above candle level. */
-    static boolean hasLitRing(Level level, BlockPos anchor, boolean complete) {
         for (int[] p : CANDLES) {
             BlockState state = level.getBlockState(anchor.offset(p[0],p[1],p[2]));
             if (!(state.getBlock() instanceof CandleBlock) || !state.getValue(CandleBlock.LIT)) return false;

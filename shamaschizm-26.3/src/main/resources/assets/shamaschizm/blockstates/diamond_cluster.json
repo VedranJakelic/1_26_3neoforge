@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "shamaschizm:block/diamond_cluster",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "shamaschizm:block/diamond_cluster",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "shamaschizm:block/diamond_cluster",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "shamaschizm:block/diamond_cluster",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "shamaschizm:block/diamond_cluster"
+    },
+    "facing=west": {
+      "model": "shamaschizm:block/diamond_cluster",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

@@ -136,6 +136,16 @@ public final class ClientTrippyEffects {
                 uniforms(astral,"AstralConfig",(float)time,intensity,AstralClient.seconds(),AstralClient.danger());
                 uniforms(astral,"AstralSun",(float)sun.x,(float)sun.y,(float)sun.z,0F);
                 uniforms(astral,"AstralMoon",(float)moon.x,(float)moon.y,(float)moon.z,0F);
+                // Reconstruct world directions instead of translating a flat screen pattern.
+                var camera=mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+                var inverse=new org.joml.Matrix4f(camera.projectionMatrix).mul(camera.viewRotationMatrix).invert();
+                uniforms(astral,"AstralInverse0",inverse.m00(),inverse.m01(),inverse.m02(),inverse.m03());
+                uniforms(astral,"AstralInverse1",inverse.m10(),inverse.m11(),inverse.m12(),inverse.m13());
+                uniforms(astral,"AstralInverse2",inverse.m20(),inverse.m21(),inverse.m22(),inverse.m23());
+                uniforms(astral,"AstralInverse3",inverse.m30(),inverse.m31(),inverse.m32(),inverse.m33());
+                Vec3 sunDirection=AstralClient.celestial(false),moonDirection=AstralClient.celestial(true);
+                uniforms(astral,"AstralSunDirection",(float)sunDirection.x,(float)sunDirection.y,(float)sunDirection.z,0F);
+                uniforms(astral,"AstralMoonDirection",(float)moonDirection.x,(float)moonDirection.y,(float)moonDirection.z,0F);
                 astral.process(target,allocator);
             }
             return; // Neither ritual reveal runs during astral projection.
