@@ -31,6 +31,13 @@
           "width": 992,
           "height": 1012,
           "bilinear": true
+        },
+        {
+          "sampler_name": "GloriaRitual",
+          "location": "shamaschizm:gloria_ritual_vision",
+          "width": 1385,
+          "height": 1080,
+          "bilinear": true
         }
       ],
       "output": "swap",

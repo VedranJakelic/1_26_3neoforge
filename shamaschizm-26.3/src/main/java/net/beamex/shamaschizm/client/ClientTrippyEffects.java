@@ -119,7 +119,8 @@ public final class ClientTrippyEffects {
             intensity = Mth.approach(intensity, active ? (AstralClient.active()?1F:TripVisionClient.overall()) : 0F, dt/(active ? 2F : 6F));
             time += dt;
             // Integrate speed rather than multiplying time: stopping a turn never snaps the pattern back.
-            fractalRotation += dt * (0.035 + (alive ? headTurn : 0F) * 0.9);
+            // Keep the current phase, but stop mouse-driven spin throughout a revelation.
+            fractalRotation += dt * (0.035 + (alive && TripVisionClient.opacity() <= 0F ? headTurn : 0F) * 0.9);
         }
         if (active) {
             float health = mc.player.getHealth();

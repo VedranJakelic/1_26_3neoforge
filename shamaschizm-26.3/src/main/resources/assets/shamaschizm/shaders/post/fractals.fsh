@@ -4,6 +4,7 @@ uniform sampler2D InSampler;
 uniform sampler2D RitualSampler;
 uniform sampler2D HomunculusRitualSampler;
 uniform sampler2D HomunculusSealsSampler;
+uniform sampler2D GloriaRitualSampler;
 layout(std140) uniform FractalConfig { vec4 Fractal; };
 layout(std140) uniform FractalEyes { vec4 Eyes; };
 layout(std140) uniform TripVision { vec4 Vision; };
@@ -50,21 +51,103 @@ vec3 revealSymbol(vec3 background, vec2 center, vec2 aspect, vec2 sourceCenter,
     float alpha=art.a*nonBlack*inside*smoothstep(0.0,1.0,progress)*visibility;
     return mix(background,art.rgb,clamp(alpha,0.0,1.0));
 }
-vec3 renderPattern(vec2 center, float pin, float visionAge, float visionOpacity) {
+// Smooth, stable lunar surface detail, evaluated in moon-local coordinates.
+float lunarHash(vec3 p) {
+    p=fract(p*.1031);p+=dot(p,p.yzx+33.33);
+    return fract((p.x+p.y)*p.z);
+}
+float lunarNoise(vec3 p) {
+    vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+    return mix(mix(mix(lunarHash(i),lunarHash(i+vec3(1,0,0)),f.x),
+                   mix(lunarHash(i+vec3(0,1,0)),lunarHash(i+vec3(1,1,0)),f.x),f.y),
+               mix(mix(lunarHash(i+vec3(0,0,1)),lunarHash(i+vec3(1,0,1)),f.x),
+                   mix(lunarHash(i+vec3(0,1,1)),lunarHash(i+vec3(1,1,1)),f.x),f.y),f.z);
+}
+float lunarSmoothMin(float a,float b,float k) {
+    float h=clamp(.5+.5*(b-a)/k,0.0,1.0);
+    return mix(b,a,h)-k*h*(1.0-h);
+}
+// The single dark iris stretches into connected lobes before separating into moons.
+vec3 revealGloriaMoons(vec3 background, vec2 center, vec2 aspect, float age) {
+    float fit=min(1.0,aspect.x);
+    float travel=smoothstep(9.0,20.0,age);
+    float split=smoothstep(8.0,10.0,age);
+    float illuminate=smoothstep(20.0,26.0,age);
+    float radius=mix(.0975,.035,travel)*fit;
+    vec2 local=(texCoord-center)*aspect;
+    float field=10.0,nearest=10.0,which=0.0;
+    vec2 moonQ=vec2(0.0);
+    for(int i=0;i<12;i++) {
+        float fi=float(i),phase=fi*6.28318530718/12.0;
+        // A small curved, staggered pull relaxes into an evenly spaced final ring.
+        float pull=clamp(travel+.055*sin(fi*2.39996)*sin(travel*3.14159265),0.0,1.0);
+        float angle=phase+1.57079632679+.20*sin(travel*3.14159265);
+        vec2 moonCenter=.44*pull*fit*vec2(cos(angle),sin(angle));
+        vec2 delta=local-moonCenter;
+        float distance=length(delta)-radius;
+        float neck=mix(.018,.0002,smoothstep(.20,.85,travel))*fit;
+        field=i==0?distance:lunarSmoothMin(field,distance,neck);
+        if(distance<nearest){nearest=distance;which=fi;moonQ=delta/radius;}
+    }
+    float edge=max(fwidth(field)*1.5,.0025*fit);
+    float mask=(1.0-smoothstep(-edge,edge,field))*split;
+    vec3 moon=vec3(.003);
+    if(mask>.001&&illuminate>0.0) {
+        float r2=dot(moonQ,moonQ),z=sqrt(max(0.0,1.0-r2));
+        vec3 normal=vec3(moonQ,z);
+        float phase=which*6.28318530718/12.0;
+        float incidence=dot(normal,vec3(sin(phase),0.0,-cos(phase)));
+        // Broad penumbra and diffuse relief instead of a razor-sharp vector terminator.
+        float lit=smoothstep(-.13,.18,incidence)*pow(max(.02,incidence),.32);
+        vec3 stone=normal*3.4+vec3(which*3.17,which*.71,2.6);
+        float terrain=.52*lunarNoise(stone)+.28*lunarNoise(stone*2.1)+.14*lunarNoise(stone*4.3)+.06*lunarNoise(stone*8.7);
+        float maria=smoothstep(.36,.62,lunarNoise(stone*.84));
+        float surface=.48+.36*terrain+.16*maria;
+        float limb=.65+.35*z;
+        vec3 daylight=vec3(.94,.92,.87)*surface*lit*limb;
+        vec3 earthshine=vec3(.025,.029,.036)*surface*(.5+.5*z);
+        moon=mix(moon,earthshine+daylight,illuminate);
+    }
+    return mix(background,moon,mask);
+}
+vec3 revealGloriaDrawing(vec3 background, vec2 center, vec2 aspect, float age, float phase) {
+    float progress=clamp((age-26.0)/14.0,0.0,1.0);
+    float growth=smoothstep(0.0,.90,progress);
+    float readable=smoothstep(.10,1.0,progress);
+    float fit=min(1.0,aspect.x);
+    vec2 imageSize=vec2(1385.0/1080.0,1.0)*.64*fit*mix(.015,1.0,growth);
+    vec2 uv=(texCoord-center)*aspect/imageSize+vec2(.5);
+    uv.y=1.0-uv.y;
+    float inside=step(0.0,uv.x)*step(uv.x,1.0)*step(0.0,uv.y)*step(uv.y,1.0);
+    vec2 wave=vec2(sin(uv.y*19.0+Fractal.x*.18),cos(uv.x*17.0-Fractal.x*.16));
+    vec2 source=uv+wave*.045*pow(1.0-readable,2.0);
+    vec4 art=texture(GloriaRitualSampler,clamp(source,0.0,1.0));
+    float nonBlack=smoothstep(0.0,.04,max(art.r,max(art.g,art.b)));
+    float emergence=smoothstep(0.0,.45,progress);
+    vec2 imageP=(texCoord-center)*aspect/(imageSize*.62);
+    background*=1.0-(1.0-smoothstep(.65,1.2,length(imageP)))*emergence*.82;
+    vec3 ink=mix((.5+.5*cos(vec3(0,2.0944,4.1888)+phase))*max(art.r,max(art.g,art.b)),art.rgb,readable);
+    return mix(background,ink,clamp(art.a*nonBlack*inside*emergence,0.0,1.0));
+}
+vec3 renderPattern(vec2 patternCenter, float pin, float visionAge, float visionOpacity) {
     float t=Fractal.x, strength=Fractal.y;
     vec2 size=vec2(textureSize(InSampler,0));
     vec2 aspect=vec2(size.x/size.y,1.0);
-    vec2 p=(texCoord-center)*aspect*2.0;
-    vec2 visionP=p;
+    // One evolving field; the eye has a separate, fixed projected sky position.
+    vec2 center=Vision.xy;
+    vec2 p=(texCoord-patternCenter)*aspect*2.0;
+    vec2 visionP=(texCoord-center)*aspect*2.0;
     float opening=smoothstep(0.0,4.0,visionAge)*visionOpacity;
     float morph=smoothstep(9.0,16.0,visionAge);
-    bool homunculus=Eyes.z>.5;
-    float rise=homunculus?smoothstep(23.0,35.0,visionAge):smoothstep(16.0,23.0,visionAge);
+    bool gloria=Eyes.z>1.5;
+    bool homunculus=Eyes.z>.5&&!gloria;
+    float rise=gloria?smoothstep(18.0,24.0,visionAge):
+            (homunculus?smoothstep(23.0,35.0,visionAge):smoothstep(16.0,23.0,visionAge));
     float reveal=smoothstep(23.0,40.0,visionAge);
     vec2 ce=visionP/.65;
     float centralSupport=1.0-smoothstep(.85,1.6,length(ce));
     float centralLid=max(.17,.42*sqrt(max(0.0,1.0-ce.x*ce.x)));
-    p.y*=1.0+opening*(1.0-rise)*centralSupport*(1.0/centralLid-1.0)*.5;
+    p.y+=visionP.y*opening*(1.0-rise)*centralSupport*(1.0/centralLid-1.0)*.5;
     p+=0.06*vec2(sin(t*0.09),cos(t*0.07))*(1.0-pin);
     // Eyes and fractals live in the same gently flowing coordinate system.
     // Applying this before BOTH shape generation stages carries the eyes with it.
@@ -146,9 +229,9 @@ vec3 renderPattern(vec2 center, float pin, float visionAge, float visionOpacity)
     float centralRim=exp(-pow((abs(ce.y)-eyeHeight)/.04,2.0))*(1.0-smoothstep(.94,1.03,abs(ce.x)));
     float irisRadius=length(ce);
     float irisShade=(1.0-smoothstep(.27,.32,irisRadius))*.45+(1.0-smoothstep(.10,.14,irisRadius))*.50;
-    pattern*=1.0-clamp((centralRim*.55+centralAperture*irisShade*(1.0-(homunculus?rise:morph)))*opening*(1.0-rise),0.0,.95);
+    pattern*=1.0-clamp((centralRim*.55+centralAperture*irisShade*(1.0-(gloria?smoothstep(9.0,18.0,visionAge):(homunculus?rise:morph))))*opening*(1.0-rise),0.0,.95);
     if(visionOpacity>0.0) {
-    if (!homunculus) {
+    if (!homunculus && !gloria) {
     // Match the rising seal exactly to its position in the final complete image.
     vec2 imageSize=vec2(929.0/780.0,1.0)*.80;
     vec2 imageCenter=center-vec2(0,.05);
@@ -176,7 +259,7 @@ vec3 renderPattern(vec2 center, float pin, float visionAge, float visionOpacity)
     pattern*=1.0-backdrop*.72;
     vec3 ink=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.98),reveal);
     pattern=mix(pattern,ink,clamp(lines*emergence,0.0,1.0));
-    } else {
+    } else if(homunculus) {
         vec2 sources[4]=vec2[4](vec2(.198,.178),vec2(.815,.176),vec2(.195,.818),vec2(.821,.816));
         for(int i=0;i<4;i++) {
             vec2 side=vec2((i==0||i==2)?-1.0:1.0,i<2?1.0:-1.0);
@@ -190,6 +273,10 @@ vec3 renderPattern(vec2 center, float pin, float visionAge, float visionOpacity)
         pattern=revealDrawing(pattern,HomunculusRitualSampler,center,aspect,
                 vec2(1199.0/1312.0,1.0)*.86,vec2(.5),vec2(1.0),
                 clamp((visionAge-23.0)/17.0,0.0,1.0),phase,visionOpacity);
+    } else {
+        vec3 revelation=revealGloriaDrawing(pattern,center,aspect,visionAge,phase);
+        revelation=revealGloriaMoons(revelation,center,aspect,visionAge);
+        pattern=mix(pattern,revelation,visionOpacity);
     }
     }
     return pattern;
@@ -199,18 +286,19 @@ void main() {
     float strength=Fractal.y, danger=Fractal.z;
     vec2 size=vec2(textureSize(InSampler,0));
     vec2 aspect=vec2(size.x/size.y,1.0);
-    float pin=smoothstep(0.0,6.0,Eyes.w);
-    vec2 anchor=mix(vec2(.5),Vision.xy,pin);
+    // Position is projected from the captured world direction; never blend it with the reticle.
+    vec2 anchor=Vision.xy;
     // Let an off-screen apparition leave the view, rather than dragging the entire
     // background toward a perspective singularity or freezing its center at a clamp.
     vec2 outside=max(abs(anchor-vec2(.5))-vec2(.5),vec2(0))*aspect;
     float visibility=1.0-smoothstep(.15,.55,length(outside));
     float blend=clamp(Vision.w*visibility,0.0,1.0);
-    vec3 normal=vec3(0), anchored=vec3(0);
-    if(blend<1.0)normal=renderPattern(vec2(.5),0.0,0.0,0.0);
-    if(blend>0.0)anchored=renderPattern(anchor,pin,Vision.z,1.0);
-    // Crossfade layers, not their center coordinates. The eye never slides to the reticle.
-    vec3 pattern=mix(clamp(normal,0.0,1.0),clamp(anchored,0.0,1.0),blend);
+    // Warp one field into the eye instead of dissolving between two fractals.
+    // Only the background's coordinate frame relaxes back on interruption;
+    // all eye/iris/ritual geometry remains centered on the fixed sky anchor.
+    vec2 patternCenter=mix(vec2(.5),anchor,blend);
+    float pin=smoothstep(0.0,6.0,Eyes.w)*blend;
+    vec3 pattern=renderPattern(patternCenter,pin,Vision.z,blend);
     float luminance=dot(scene,vec3(0.2126,0.7152,0.0722));
     // At full health there is no blanket overlay: only genuinely dark pixels reveal it.
     float shadow=1.0-smoothstep(0.015,0.20,luminance);

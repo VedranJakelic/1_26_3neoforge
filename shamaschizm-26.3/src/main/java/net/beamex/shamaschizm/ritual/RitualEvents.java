@@ -27,6 +27,36 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 /** Pattern coordinates were extracted from ritualcircle.nbt; the anchor is the origin. */
 @EventBusSubscriber(modid = Shamaschizm.MOD_ID)
 public final class RitualEvents {
+    public static boolean hasLitRing(Level level, BlockPos anchor, boolean complete) {
+        for (int[] p : CANDLES) {
+            BlockState state = level.getBlockState(
+                    anchor.offset(p[0], p[1], p[2]));
+
+            if (!(state.getBlock() instanceof CandleBlock)
+                    || !state.getValue(CandleBlock.LIT)) {
+                return false;
+            }
+        }
+
+        for (int[] p : CORNERS) {
+            if (level.getBlockState(
+                    anchor.offset(p[0], -1, p[1])).isAir()) {
+                return false;
+            }
+
+            BlockState state = level.getBlockState(
+                    anchor.offset(p[0], 0, p[1]));
+
+            if (!state.is(complete
+                    ? Blocks.SOUL_CAMPFIRE
+                    : Blocks.CAMPFIRE)
+                    || !state.getValue(CampfireBlock.LIT)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
     private RitualEvents() {}
 
     // Relative to the anchor (0,0,0). The anchor is one block above crying obsidian.

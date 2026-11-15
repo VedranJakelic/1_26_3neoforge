@@ -12,7 +12,7 @@ public final class TripVisionClient {
     private static Vec3 anchor,previousLook,previousPosition;
     private static float anchorAge;
     private static Vec3 lastProjection=new Vec3(.5,.5,1);
-    private static int ritual; // 0: original ritual; 1: Homo Nucleus. Stable until the next revelation.
+    private static int ritual; // 0: original ritual; 1: Homo Nucleus; 2: Gloria. Stable until the next revelation.
     private TripVisionClient(){}
     public static void reset(){state=new TripVisionState();anchor=null;previousLook=null;previousPosition=null;ritual=0;anchorAge=0;lastProjection=new Vec3(.5,.5,1);}
     public static float eyeGain(){return state.eyeGain;}
@@ -49,7 +49,7 @@ public final class TripVisionClient {
                      TripVisionState.moon(mc.level.getOverworldClockTime()),darkness,steady,aligned);
         if(!was&&state.anchored){
             anchor=look;anchorAge=0;lastProjection=new Vec3(.5,.5,1);
-            ritual=java.util.concurrent.ThreadLocalRandom.current().nextInt(2);
+            ritual=java.util.concurrent.ThreadLocalRandom.current().nextInt(3);
         }
         // Keep the world direction while the apparition fades. Once it is gone,
         // the shader has fully returned to its independent normal-fractal layer.
@@ -62,7 +62,16 @@ public final class TripVisionClient {
     /** Fixed world direction, not a forced camera rotation. */
     public static Vec3 screenAnchor(){
         if(anchor==null)return new Vec3(.5,.5,1);
-        Vec3 projected=SurfaceEyeEffects.projectDirection(anchor);
+        // Use the main world camera directly. The surface-eye cache captures the
+        // effect-adjusted GPU projection and is not the ritual's source of orientation.
+        var mc=Minecraft.getInstance();
+        if(mc.level==null||mc.player==null)return new Vec3(lastProjection.x,lastProjection.y,0);
+        var camera=mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+        float[] projection=new float[16],view=new float[16];
+        camera.projectionMatrix.get(projection);
+        camera.viewRotationMatrix.get(view);
+        double[] sky=RitualSkyProjection.project(projection,view,anchor.x,anchor.y,anchor.z);
+        Vec3 projected=new Vec3(sky[0],sky[1],sky[2]);
         if(projected.z>0 && Double.isFinite(projected.x) && Double.isFinite(projected.y)) {
             // Do not clamp a far-away center into a visible frozen position.
             if(Math.abs(projected.x-.5)>8 || Math.abs(projected.y-.5)>8)
