@@ -120,7 +120,8 @@ public final class ClientTrippyEffects {
             time += dt;
             // Integrate speed rather than multiplying time: stopping a turn never snaps the pattern back.
             // Keep the current phase, but stop mouse-driven spin throughout a revelation.
-            fractalRotation += dt * (0.035 + (alive && TripVisionClient.opacity() <= 0F ? headTurn : 0F) * 0.9);
+            if (TripVisionClient.opacity() <= 0F)
+                fractalRotation += dt * (0.035 + (alive ? headTurn : 0F) * 0.9);
         }
         if (active) {
             float health = mc.player.getHealth();
@@ -171,9 +172,16 @@ public final class ClientTrippyEffects {
         eyeHistoryValid = eyes != null;
         uniforms(chain, "FractalConfig", (float)time, intensity, severity, (float)fractalRotation);
         uniforms(chain, "FractalEyes", eyeDepth, TripVisionClient.density(), TripVisionClient.ritual(), TripVisionClient.anchorAge());
-        Vec3 anchor = TripVisionClient.screenAnchor();
-        uniforms(chain, "TripVision", (float)anchor.x, (float)anchor.y,
-                TripVisionClient.age(), TripVisionClient.opacity()*(float)anchor.z);
+        var worldCamera=mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+        float[] inverse=new float[16];
+        new org.joml.Matrix4f(worldCamera.projectionMatrix).mul(worldCamera.viewRotationMatrix).invert().get(inverse);
+        for(int col=0;col<4;col++)uniforms(chain,"VisionRay"+col,
+                inverse[col*4],inverse[col*4+1],inverse[col*4+2],inverse[col*4+3]);
+        Vec3 forward=TripVisionClient.skyForward(),right=TripVisionClient.skyRight(),up=TripVisionClient.skyUp();
+        uniforms(chain,"VisionForward",(float)forward.x,(float)forward.y,(float)forward.z,TripVisionClient.skyScale());
+        uniforms(chain,"VisionRight",(float)right.x,(float)right.y,(float)right.z,0F);
+        uniforms(chain,"VisionUp",(float)up.x,(float)up.y,(float)up.z,0F);
+        uniforms(chain, "TripVision", .5F, .5F, TripVisionClient.age(), TripVisionClient.opacity());
         chain.process(target, allocator);
 
     }

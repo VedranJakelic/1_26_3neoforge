@@ -1,0 +1,44 @@
+{
+  "targets": {
+    "swap": {},
+    "history": {"persistent": true}
+  },
+  "passes": [
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/stew_motion_blur",
+      "inputs": [
+        {"sampler_name": "In", "target": "minecraft:main", "bilinear": true},
+        {"sampler_name": "History", "target": "history", "bilinear": true}
+      ],
+      "output": "swap",
+      "uniforms": {
+        "StewBlurConfig": [
+          {"name": "Blur", "type": "vec4", "value": [0, 0, 0, 0]}
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [{"sampler_name": "In", "target": "swap"}],
+      "output": "minecraft:main",
+      "uniforms": {
+        "BlitConfig": [
+          {"name": "ColorModulate", "type": "vec4", "value": [1, 1, 1, 1]}
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [{"sampler_name": "In", "target": "swap"}],
+      "output": "history",
+      "uniforms": {
+        "BlitConfig": [
+          {"name": "ColorModulate", "type": "vec4", "value": [1, 1, 1, 1]}
+        ]
+      }
+    }
+  ]
+}

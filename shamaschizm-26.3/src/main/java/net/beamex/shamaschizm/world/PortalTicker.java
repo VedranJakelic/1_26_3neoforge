@@ -14,7 +14,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 @EventBusSubscriber(modid = Shamaschizm.MOD_ID)
@@ -25,6 +24,7 @@ public final class PortalTicker {
     @net.neoforged.bus.api.SubscribeEvent
     public static void onPlayerTick(final PlayerTickEvent.Post e) {
         if (!(e.getEntity() instanceof ServerPlayer sp)) return;
+        if (net.beamex.shamaschizm.loading.DungeonLoading.active(sp)) return;
         if (!sp.isAlive() || sp.isSpectator() || sp.isPassenger() || sp.isVehicle() || sp.isOnPortalCooldown()) return;
 
         BlockPos hit = getTouchedPortalAccurate(sp);
@@ -65,3 +65,4 @@ public final class PortalTicker {
         return null;
     }
 }
+

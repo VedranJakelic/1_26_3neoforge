@@ -1,0 +1,47 @@
+{
+  "targets": {},
+  "passes": [
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "shamaschizm:post/dungeon_loading",
+      "inputs": [
+        {
+          "sampler_name": "Sky",
+          "location": "shamaschizm:dungeon_loading/end_sky",
+          "width": 128,
+          "height": 128,
+          "bilinear": true
+        },
+        {
+          "sampler_name": "Stars",
+          "location": "shamaschizm:dungeon_loading/end_portal",
+          "width": 256,
+          "height": 256,
+          "bilinear": true
+        },
+        {
+          "sampler_name": "Mask",
+          "location": "shamaschizm:dungeon_loading/frame_14",
+          "width": 128,
+          "height": 128,
+          "bilinear": true
+        }
+      ],
+      "output": "minecraft:main",
+      "uniforms": {
+        "LoadingConfig": [
+          {
+            "name": "Clock",
+            "type": "vec4",
+            "value": [
+              0,
+              1,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

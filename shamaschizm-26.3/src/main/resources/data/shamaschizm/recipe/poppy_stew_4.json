@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:red_mushroom",
+    "minecraft:acacia_sapling",
+    "minecraft:lily_of_the_valley",
+    "minecraft:bowl",
+    "minecraft:poppy",
+    "minecraft:poppy",
+    "minecraft:poppy",
+    "minecraft:poppy"
+  ],
+  "result": {
+    "id": "minecraft:suspicious_stew",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "shamaschizm_poppy_stew": 4
+      },
+      "minecraft:item_name": {
+        "translate": "item.shamaschizm.poppy_stew"
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 package net.beamex.shamaschizm.event;
 
+import net.beamex.shamaschizm.eclipse.Eclipses;
 import java.util.List;
 import java.util.Optional;
 import net.beamex.shamaschizm.Shamaschizm;
@@ -54,13 +55,13 @@ public final class SchizmSpawnEvents {
 
     /**
      * Replaces plains spawn lists so old and new Schizm chunks behave identically.
-     * Group sizes stop at four because that is vanilla's hard cluster limit for
-     * these monsters; deeper entries therefore request a full four-mob cluster.
+     * SchizmPopulationEvents also raises the actual cluster limit, so these
+     * larger pack requests are not truncated by vanilla's four-mob limit.
      */
     @SubscribeEvent
     public static void potentialSpawns(LevelEvent.PotentialSpawns event) {
         if (!(event.getLevel() instanceof ServerLevel level)
-                || !level.dimension().equals(Schizm.KEY)) return;
+                || !Eclipses.habitat(level, event.getPos())) return;
 
         if (GardenZoneEntity.contains(level, event.getPos())) {
             event.setCanceled(true);
@@ -73,7 +74,7 @@ public final class SchizmSpawnEvents {
             // density at Y=0 and below. Both selection weight and pack size
             // increase, so depth affects actual roach numbers rather than only
             // their share relative to regular centipedes.
-            float roachDepth = Mth.clamp((210.0F - event.getPos().getY()) / 160.0F, 0.0F, 1.0F);
+            float roachDepth = Mth.clamp((210.0F - Eclipses.y(level, event.getPos())) / 160.0F, 0.0F, 1.0F);
             int adultWeight = Math.round(Mth.lerp(roachDepth, 24.0F, 100.0F));
             int babyWeight = Math.round(Mth.lerp(roachDepth, 20.0F, 90.0F));
             int adultMin = 2 + Math.round(roachDepth);
@@ -87,18 +88,20 @@ public final class SchizmSpawnEvents {
         if (event.getMobCategory() != MobCategory.MONSTER) return;
 
         clear(event);
-        int minGroup = event.getPos().getY() < 80 ? 4 : 3;
-        add(event, EntityTypes.ZOMBIE, 70, minGroup, 4);
-        add(event, EntityTypes.SKELETON, 70, minGroup, 4);
-        add(event, EntityTypes.SPIDER, 38, minGroup, 4);
-        add(event, EntityTypes.HUSK, 15, minGroup, 4);
+        float packDepth = depth(level, Eclipses.y(level, event.getPos()));
+        int minGroup = 1 + Math.round(packDepth * 4);
+        int maxGroup = 3 + Math.round(packDepth * 5);
+        add(event, EntityTypes.ZOMBIE, 70, minGroup, maxGroup);
+        add(event, EntityTypes.SKELETON, 70, minGroup, maxGroup);
+        add(event, EntityTypes.SPIDER, 38, minGroup, maxGroup);
+        add(event, EntityTypes.HUSK, 15, minGroup, maxGroup);
         // One chain per spawn roll; GiantCentipedeEntity enforces the separate
         // limit of at most two living chains in each 100 x 100 area.
         add(event, ModEntities.GIANT_CENTIPEDE.get(), 8, 1, 1);
         // Creepers remain deliberately uncommon and form smaller clusters.
         add(event, EntityTypes.CREEPER, 6, 2, 3);
-        if (event.getPos().getY() < WITHER_SKELETON_MAX_Y) {
-            add(event, EntityTypes.WITHER_SKELETON, 20, minGroup, 4);
+        if (Eclipses.y(level, event.getPos()) < WITHER_SKELETON_MAX_Y) {
+            add(event, EntityTypes.WITHER_SKELETON, 20, minGroup, maxGroup);
         }
         // Witches and endermen are intentionally absent, preserving the
         // existing Schizm rule for those two types.
@@ -106,15 +109,15 @@ public final class SchizmSpawnEvents {
 
     /**
      * Uses a depth-scaled local density ceiling instead of rejecting each member
-     * randomly. This yields fewer monsters deep down without breaking clusters
-     * into isolated single mobs.
+     * randomly. Larger deep packs can form without breaking clusters into
+     * isolated single mobs; all upper limits remain bounded.
      */
     @SubscribeEvent
     public static void checkNaturalSpawn(MobSpawnEvent.SpawnPlacementCheck event) {
         if (event.getSpawnType() != EntitySpawnReason.NATURAL
                 || event.getEntityType().getCategory() != MobCategory.MONSTER) return;
         ServerLevel level = event.getLevel().getLevel();
-        if (!level.dimension().equals(Schizm.KEY)) return;
+        if (!Eclipses.habitat(level, event.getPos())) return;
 
         BlockPos pos = event.getPos();
         if (GardenZoneEntity.contains(level, pos)) {
@@ -122,7 +125,18 @@ public final class SchizmSpawnEvents {
             return;
         }
 
-        int cap = Math.round(Mth.lerp(depth(level, pos.getY()), 12.0F, 4.0F));
+        float packDepth = depth(level, Eclipses.y(level, pos));
+        // A whole pack shares a deterministic window; do not randomly reject individual members.
+        // Upper levels spawn normally; deeper levels get progressively rarer 20-tick windows.
+        if (packDepth > 0.05F) {
+            int period = 40 + Math.round(packDepth * packDepth * 1160);
+            long offset = (long)(pos.getX() >> 5) * 73428767L ^ (long)(pos.getZ() >> 5) * 912931L;
+            if (Math.floorMod(level.getGameTime() + offset, period) >= 20) {
+                event.setResult(MobSpawnEvent.SpawnPlacementCheck.Result.FAIL);
+                return;
+            }
+        }
+        int cap = Math.round(Mth.lerp(packDepth, 12.0F, 8.0F));
         AABB neighborhood = new AABB(pos).inflate(32.0D, 16.0D, 32.0D);
         int nearby = level.getEntitiesOfClass(Monster.class, neighborhood,
                 monster -> monster.isAlive()).size();
@@ -135,7 +149,7 @@ public final class SchizmSpawnEvents {
     @SubscribeEvent
     public static void finalizeSpawn(FinalizeSpawnEvent event) {
         ServerLevel level = event.getLevel().getLevel();
-        if (!level.dimension().equals(Schizm.KEY)) return;
+        if (!Eclipses.habitat(level, event.getEntity().blockPosition())) return;
 
         if (GardenZoneEntity.contains(level, event.getEntity().blockPosition())
                 && blockedGardenReason(event.getSpawnType())) {
@@ -147,7 +161,7 @@ public final class SchizmSpawnEvents {
                 && event.getEntity() instanceof Monster
                 && canReceiveDepthEquipment(event.getEntity())) {
             if (event.getEntity() instanceof Zombie zombie
-                    && zombie.blockPosition().getY() < ANCIENT_ZOMBIE_MAX_Y
+                    && Eclipses.y(level, zombie.blockPosition()) < ANCIENT_ZOMBIE_MAX_Y
                     && zombie.getRandom().nextFloat() < ANCIENT_ZOMBIE_CHANCE) {
                 zombie.getPersistentData().putInt(
                         ANCIENT_LOADOUT_TAG,
@@ -155,7 +169,7 @@ public final class SchizmSpawnEvents {
                 return;
             }
 
-            float depth = depth(level, event.getEntity().blockPosition().getY());
+            float depth = depth(level, Eclipses.y(level, event.getEntity().blockPosition()));
             if (depth > 0.0F) {
                 // EntityJoinLevelEvent runs after vanilla finalizeSpawn, allowing
                 // this equipment to augment/replace vanilla's finalized loadout.
@@ -167,7 +181,6 @@ public final class SchizmSpawnEvents {
     @SubscribeEvent
     public static void equipAfterFinalization(EntityJoinLevelEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level)
-                || !level.dimension().equals(Schizm.KEY)
                 || !(event.getEntity() instanceof Mob mob)) return;
 
         if (mob instanceof Zombie zombie && mob.getPersistentData().contains(ANCIENT_LOADOUT_TAG)) {
@@ -289,7 +302,9 @@ public final class SchizmSpawnEvents {
 
     private static float depth(ServerLevel level, int y) {
         if (y >= DEPTH_START_Y) return 0.0F;
-        return Mth.clamp((DEPTH_START_Y - y) / (float)(DEPTH_START_Y - level.getMinY()), 0.0F, 1.0F);
+        ServerLevel schizm = level.getServer().getLevel(Schizm.KEY);
+        int minY = level.dimension().equals(Schizm.KEY) ? level.getMinY() : schizm != null ? schizm.getMinY() : -128;
+        return Mth.clamp((DEPTH_START_Y - y) / (float)(DEPTH_START_Y - minY), 0.0F, 1.0F);
     }
 
     private static boolean blockedGardenReason(EntitySpawnReason reason) {
@@ -313,3 +328,4 @@ public final class SchizmSpawnEvents {
         event.addSpawnerData(new Weighted<>(new MobSpawnSettings.SpawnerData(type, net.minecraft.util.valueproviders.UniformInt.of(min, max)), weight));
     }
 }
+

@@ -25,6 +25,9 @@ public final class BabyRoachEntity extends RoachEntity {
         super(type, level);
     }
 
+    @Override
+    public boolean isSilent() { return true; }
+
     public static AttributeSupplier.Builder createAttributes() {
         return PathfinderMob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 12.0D)
@@ -55,8 +58,9 @@ public final class BabyRoachEntity extends RoachEntity {
 
     @Override
     public boolean checkSpawnRules(LevelAccessor level, EntitySpawnReason reason) {
-        return this.level().dimension().equals(Schizm.KEY)
-                && level.getMaxLocalRawBrightness(this.blockPosition()) <= 7
+        return net.beamex.shamaschizm.eclipse.Eclipses.habitat(this.level(), blockPosition())
+                && (net.beamex.shamaschizm.eclipse.Eclipses.active(this.level(), blockPosition())
+                    || level.getMaxLocalRawBrightness(blockPosition()) <= 7)
                 && super.checkSpawnRules(level, reason);
     }
 
@@ -81,3 +85,4 @@ public final class BabyRoachEntity extends RoachEntity {
         }
     }
 }
+

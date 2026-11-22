@@ -27,11 +27,14 @@ public final class ShamaschizmCommands {
                         .then(Commands.literal("deep").executes(c->status(c.getSource()))
                                 .then(Commands.argument("enabled",BoolArgumentType.bool())
                                         .executes(c->setDeep(c.getSource(),BoolArgumentType.getBool(c,"enabled")))))
+                        .then(Commands.literal("relics").executes(c->status(c.getSource()))
+                                .then(Commands.argument("enabled",BoolArgumentType.bool())
+                                        .executes(c->setRelics(c.getSource(),BoolArgumentType.getBool(c,"enabled")))))
                         .then(Commands.literal("arena2").executes(c->status(c.getSource()))
                                 .then(Commands.argument("enabled",BoolArgumentType.bool()).executes(c->set(c.getSource(),BoolArgumentType.getBool(c,"enabled")))))));
     }
     private static int help(CommandSourceStack source){
-        source.sendSuccess(()->Component.literal("Shamaschizm commands:\n/shamaschizm help - Show this command overview.\n/soul [get] [player] - Show your or an online player's soul balance.\n/soul add <player> <amount> - Add souls (operator).\n/soul remove <player> <amount> - Remove souls, stopping at zero (operator).\n/soul set <player> <amount> - Set a soul balance (operator).\n/checkgarden - Check whether your current Schizm dungeon has a recorded garden.\n/shamaschizm experimental - Show experimental settings (operator).\n/shamaschizm experimental rooms <4..256> - Set the main room target beyond the entrance (default 60); garden, loops and caps are extra.\n/shamaschizm experimental deep <true|false> - Allow deep-tagged rooms (default false).\n/shamaschizm experimental arena2 <true|false> - Enable/disable entrance2 -> arena2 -> garden1 for newly generated dungeons (operator). Existing dungeons are unchanged."),false);
+        source.sendSuccess(()->Component.literal("Shamaschizm commands:\n/shamaschizm help - Show this command overview.\n/soul [get] [player] - Show your or an online player's soul balance.\n/soul add <player> <amount> - Add souls (operator).\n/soul remove <player> <amount> - Remove souls, stopping at zero (operator).\n/soul set <player> <amount> - Set a soul balance (operator).\n/checkgarden - Check whether your current Schizm dungeon has a recorded garden.\n/shamaschizm experimental - Show experimental settings (operator).\n/shamaschizm experimental rooms <4..256> - Set the main room target beyond the entrance (default 60); garden, loops and caps are extra.\n/shamaschizm experimental deep <true|false> - Allow deep-tagged rooms (default false).\n/shamaschizm experimental relics <true|false> - Try to include every relic room in new dungeons (default false).\n/shamaschizm experimental arena2 <true|false> - Enable/disable entrance2 -> arena2 -> garden1 for newly generated dungeons (operator). Existing dungeons are unchanged."),false);
         // Inspect the final dispatcher at execution time, after all legacy handlers
         // have registered. This includes separate roots as well as merged subcommands.
         var dispatcher = source.getServer().getCommands().getDispatcher();
@@ -54,8 +57,13 @@ public final class ShamaschizmCommands {
     private static int status(CommandSourceStack source){
         var settings=ExperimentalSettings.get(source.getLevel());
         source.sendSuccess(()->Component.literal("Experimental settings: arena2="+settings.arenaGarden()
-                +", rooms="+settings.roomTarget()+", deep="+settings.deepRooms()
+                +", rooms="+settings.roomTarget()+", deep="+settings.deepRooms()+", relics="+settings.allRelics()
                 +". Room target excludes the entrance and extra garden/loop/cap rooms. New dungeons only."),false);
+        return 1;
+    }
+    private static int setRelics(CommandSourceStack source,boolean enabled){
+        ExperimentalSettings.get(source.getLevel()).setAllRelics(enabled);
+        source.sendSuccess(()->Component.literal("All relic rooms "+(enabled?"enabled":"disabled")+" for new dungeons. Each is attempted once per dungeon where space and height rules allow; additional rooms may exceed the main target."),true);
         return 1;
     }
     private static int setRooms(CommandSourceStack source,int count){
@@ -77,3 +85,4 @@ public final class ShamaschizmCommands {
         source.sendSuccess(()->Component.literal("Experimental arena2 garden route "+(enabled?"enabled":"disabled")+" for future dungeons. Existing arena door locks remain in effect."),true);return 1;
     }
 }
+

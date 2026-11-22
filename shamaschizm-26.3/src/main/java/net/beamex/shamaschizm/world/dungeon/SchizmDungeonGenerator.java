@@ -162,7 +162,8 @@ public final class SchizmDungeonGenerator {
         // animated gates. They must be placed together with the room blocks.
         return new StructurePlaceSettings().setRotation(rotation).setIgnoreEntities(false)
                 .setKnownShape(true)
-                .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
+                .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK)
+                .addProcessor(new GiantWisdomAnchorProcessor());
     }
 
     private static BlockPos rotate(BlockPos point, Rotation rotation) {
@@ -275,6 +276,7 @@ public final class SchizmDungeonGenerator {
             List<Placed> candidates = new ArrayList<>();
             List<Double> weights = new ArrayList<>();
             for (Room room : prepared.choices) {
+                if (relicAlreadyPlaced(room, layout)) continue;
                 if (room.name.equals("shamaschizm:garden1")) continue;
                 Placed candidate = attach(room, exit);
                 if (candidate == null || candidate.room.exits.isEmpty()) continue;
@@ -306,8 +308,18 @@ public final class SchizmDungeonGenerator {
         return false;
     }
 
+    /** Per-template and per-dungeon; failed speculative branches do not consume relics. */
+    private static boolean relicAlreadyPlaced(Room candidate, List<Placed> layout) {
+        return layout.stream().anyMatch(existing -> candidate.name.equals(existing.room.name)
+                && ("relic".equals(candidate.entry.tag()) || "relic".equals(existing.room.entry.tag())));
+    }
+    private static boolean relicsOverlap(List<Placed> first, List<Placed> second) {
+        return first.stream().anyMatch(room -> relicAlreadyPlaced(room.room, second));
+    }
+
     /** Allows only the shared connection wall with the parent; no other box overlap. */
     private static boolean fits(Placed candidate, OpenExit connection, List<Placed> layout) {
+        if (relicAlreadyPlaced(candidate.room, layout)) return false;
         for (Placed other : layout) {
             if (!candidate.box.intersects(other.box)) continue;
             if (other != connection.parent) return false;
@@ -392,7 +404,14 @@ public final class SchizmDungeonGenerator {
                 addExits(next, frontier);
             }
         }
-        if (layout.size() - 1 == ADDITIONAL_ROOMS) {
+        boolean mainTargetReached = layout.size() - 1 == ADDITIONAL_ROOMS;
+        if (net.beamex.shamaschizm.experimental.ExperimentalSettings.get(level).allRelics()) {
+            tryAllRelics(level, layout, prepared, random, reservationCenter);
+            frontier.clear();
+            frontier.addAll(remainingExits(layout));
+            blocked.clear();
+        }
+        if (mainTargetReached) {
             frontier.addAll(blocked);
             tryGarden(level, layout, frontier, prepared, random, reservationCenter);
         }
@@ -689,6 +708,52 @@ public final class SchizmDungeonGenerator {
         return new Prepared(prepared.config, prepared.start, ordinary);
     }
 
+    /** Optional bounded pass, before garden/loop caps seal the available entrances. */
+    private static void tryAllRelics(ServerLevel level, List<Placed> layout,
+                                     Prepared prepared, Random random, BlockPos center) {
+        List<Room> missing = new ArrayList<>(prepared.choices.stream()
+                .filter(room -> "relic".equals(room.entry.tag())).toList());
+        Collections.shuffle(missing, random);
+        int[] budget = {8192};
+        boolean progress;
+        do {
+            progress = false;
+            for (var iterator = missing.iterator(); iterator.hasNext() && budget[0] > 0;) {
+                Room room = iterator.next();
+                if (layout.stream().anyMatch(p -> p.room.name.equals(room.name))) {
+                    iterator.remove();
+                    continue;
+                }
+                List<OpenExit> exits = remainingExits(layout);
+                Collections.shuffle(exits, random);
+                for (OpenExit exit : exits) {
+                    if (--budget[0] < 0) break;
+                    Placed candidate = attach(room, exit);
+                    if (candidate == null || prepared.config.weight(room.entry, candidate.box.minY(),
+                            exit.parent.room.entry.tag()) <= 0
+                            || !available(level, candidate, exit, layout, center)) continue;
+                    List<Placed> trial = new ArrayList<>(layout);
+                    trial.add(candidate);
+                    // Resolve mandatory cyan partners transactionally. Never ruin an otherwise valid dungeon.
+                    int cyanBudget = Math.min(256, budget[0]);
+                    int[] remaining = {cyanBudget};
+                    boolean paired = completeCyanConnections(level, trial, prepared, random, center, remaining);
+                    budget[0] -= cyanBudget - Math.max(0, remaining[0]);
+                    if (!paired) continue;
+                    layout.clear();
+                    layout.addAll(trial);
+                    iterator.remove();
+                    progress = true;
+                    break;
+                }
+            }
+            // A newly added room may expose an entrance suitable for an earlier skipped relic.
+        } while (progress && !missing.isEmpty() && budget[0] > 0);
+        long skipped = missing.stream().filter(room -> layout.stream()
+                .noneMatch(p -> p.room.name.equals(room.name))).count();
+        if (skipped > 0) Shamaschizm.LOGGER.info("All-relic pass skipped {} room(s): no fitting connection, height rule, or bounded search exhausted", skipped);
+    }
+
     private static boolean completeCyanConnections(ServerLevel level, List<Placed> layout,
                                                     Prepared prepared, Random random, BlockPos center) {
         return completeCyanConnections(level, layout, prepared, random, center, new int[] {256});
@@ -703,6 +768,7 @@ public final class SchizmDungeonGenerator {
         List<Placed> candidates = new ArrayList<>();
         List<Double> weights = new ArrayList<>();
         for (Room room : prepared.choices) {
+            if (relicAlreadyPlaced(room, layout)) continue;
             if (room.name.equals("shamaschizm:garden1")) continue;
             Placed candidate = attach(room, exit);
             if (candidate == null) continue;
@@ -769,6 +835,7 @@ public final class SchizmDungeonGenerator {
         List<Placed> candidates = new ArrayList<>();
         List<Double> weights = new ArrayList<>();
         for (Room room : prepared.choices) {
+            if (relicAlreadyPlaced(room, layout)) continue;
             if (room.name.equals("shamaschizm:garden1")) continue;
             Placed candidate = attach(room, exit);
             if (candidate == null) continue;
@@ -1069,6 +1136,7 @@ public final class SchizmDungeonGenerator {
                 List<Placed> occupied = new ArrayList<>(layout);
                 occupied.addAll(state.rooms);
                 for (Room room : prepared.choices) {
+                    if (relicAlreadyPlaced(room, occupied)) continue;
                     if (room.name.equals("shamaschizm:garden1")) continue;
                     Placed candidate = attach(room, state.frontier);
                     if (candidate == null || candidate.room.exits.isEmpty()) continue;
@@ -1133,6 +1201,7 @@ public final class SchizmDungeonGenerator {
     }
 
     private static boolean halvesCompatible(LoopHalf first, LoopHalf second) {
+        if (relicsOverlap(first.rooms, second.rooms)) return false;
         // The root itself is retained as a zero-room half so the other side can
         // legitimately complete the whole connection. There can be no
         // cross-half room collision when either side contains no rooms.
@@ -1181,6 +1250,7 @@ public final class SchizmDungeonGenerator {
     }
 
     private static boolean plansCompatible(LoopPlan first, LoopPlan second) {
+        if (relicsOverlap(first.rooms, second.rooms)) return false;
         if (sameExit(first.start, second.start) || sameExit(first.start, second.target)
                 || sameExit(first.target, second.start) || sameExit(first.target, second.target)) {
             return false;
@@ -1227,6 +1297,7 @@ public final class SchizmDungeonGenerator {
     private static boolean geometricallyAvailableForClosure(
             Placed candidate, OpenExit connection, OpenExit target,
             List<Placed> layout, BlockPos center) {
+        if (relicAlreadyPlaced(candidate.room, layout)) return false;
         if (!insideReservation(candidate.box, center)) return false;
         for (Placed other : layout) {
             if (!candidate.box.intersects(other.box)) continue;
@@ -1508,3 +1579,4 @@ public final class SchizmDungeonGenerator {
         }
     }
 }
+

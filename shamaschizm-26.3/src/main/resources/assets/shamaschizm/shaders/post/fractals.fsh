@@ -8,6 +8,14 @@ uniform sampler2D GloriaRitualSampler;
 layout(std140) uniform FractalConfig { vec4 Fractal; };
 layout(std140) uniform FractalEyes { vec4 Eyes; };
 layout(std140) uniform TripVision { vec4 Vision; };
+layout(std140) uniform VisionRay0 { vec4 Ray0; };
+layout(std140) uniform VisionRay1 { vec4 Ray1; };
+layout(std140) uniform VisionRay2 { vec4 Ray2; };
+layout(std140) uniform VisionRay3 { vec4 Ray3; };
+layout(std140) uniform VisionForward { vec4 SkyForward; };
+layout(std140) uniform VisionRight { vec4 SkyRight; };
+layout(std140) uniform VisionUp { vec4 SkyUp; };
+vec2 visionCoord,patternCoord;
 layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 fragColor;
 
@@ -18,7 +26,7 @@ vec3 revealDrawing(vec3 background, sampler2D drawing, vec2 center, vec2 aspect,
     float growth=smoothstep(0.0,14.0/17.0,progress);
     float readable=smoothstep(2.0/17.0,1.0,progress);
     vec2 imageSize=finalSize*mix(.012/.86,1.0,growth);
-    vec2 uv=(texCoord-center)*aspect/imageSize+vec2(.5);
+    vec2 uv=(visionCoord-center)*aspect/imageSize+vec2(.5);
     uv.y=1.0-uv.y;
     float inside=step(0.0,uv.x)*step(uv.x,1.0)*step(0.0,uv.y)*step(uv.y,1.0);
     vec2 wave=vec2(sin(uv.y*19.0+Fractal.x*.18),cos(uv.x*17.0-Fractal.x*.16));
@@ -28,7 +36,7 @@ vec3 revealDrawing(vec3 background, sampler2D drawing, vec2 center, vec2 aspect,
     float coverage=max(art.r,max(art.g,art.b))*art.a;
     float lines=smoothstep(.10,.82,coverage)*inside;
     float emergence=smoothstep(0.0,1.0,progress)*visibility;
-    vec2 imageP=(texCoord-center)*aspect/(imageSize*.62);
+    vec2 imageP=(visionCoord-center)*aspect/(imageSize*.62);
     float backdrop=(1.0-smoothstep(.65,1.2,length(imageP)))*emergence;
     background*=1.0-backdrop*.82;
     vec3 ink=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.98),readable);
@@ -38,7 +46,7 @@ vec3 revealDrawing(vec3 background, sampler2D drawing, vec2 center, vec2 aspect,
 vec3 revealSymbol(vec3 background, vec2 center, vec2 aspect, vec2 sourceCenter,
                   float progress, float visibility, float spin) {
     float growth=smoothstep(0.0,14.0/17.0,progress);
-    vec2 local=(texCoord-center)*aspect/(.36*mix(.012/.86,1.0,growth));
+    vec2 local=(visionCoord-center)*aspect/(.36*mix(.012/.86,1.0,growth));
     float angle=spin*(1.0-smoothstep(0.0,1.0,progress));
     float c=cos(angle), s=sin(angle);
     local=mat2(c,-s,s,c)*local;
@@ -74,7 +82,7 @@ vec3 revealGloriaMoons(vec3 background, vec2 center, vec2 aspect, float age) {
     float split=smoothstep(8.0,10.0,age);
     float illuminate=smoothstep(20.0,26.0,age);
     float radius=mix(.0975,.035,travel)*fit;
-    vec2 local=(texCoord-center)*aspect;
+    vec2 local=(visionCoord-center)*aspect;
     float field=10.0,nearest=10.0,which=0.0;
     vec2 moonQ=vec2(0.0);
     for(int i=0;i<12;i++) {
@@ -116,7 +124,7 @@ vec3 revealGloriaDrawing(vec3 background, vec2 center, vec2 aspect, float age, f
     float readable=smoothstep(.10,1.0,progress);
     float fit=min(1.0,aspect.x);
     vec2 imageSize=vec2(1385.0/1080.0,1.0)*.64*fit*mix(.015,1.0,growth);
-    vec2 uv=(texCoord-center)*aspect/imageSize+vec2(.5);
+    vec2 uv=(visionCoord-center)*aspect/imageSize+vec2(.5);
     uv.y=1.0-uv.y;
     float inside=step(0.0,uv.x)*step(uv.x,1.0)*step(0.0,uv.y)*step(uv.y,1.0);
     vec2 wave=vec2(sin(uv.y*19.0+Fractal.x*.18),cos(uv.x*17.0-Fractal.x*.16));
@@ -124,7 +132,7 @@ vec3 revealGloriaDrawing(vec3 background, vec2 center, vec2 aspect, float age, f
     vec4 art=texture(GloriaRitualSampler,clamp(source,0.0,1.0));
     float nonBlack=smoothstep(0.0,.04,max(art.r,max(art.g,art.b)));
     float emergence=smoothstep(0.0,.45,progress);
-    vec2 imageP=(texCoord-center)*aspect/(imageSize*.62);
+    vec2 imageP=(visionCoord-center)*aspect/(imageSize*.62);
     background*=1.0-(1.0-smoothstep(.65,1.2,length(imageP)))*emergence*.82;
     vec3 ink=mix((.5+.5*cos(vec3(0,2.0944,4.1888)+phase))*max(art.r,max(art.g,art.b)),art.rgb,readable);
     return mix(background,ink,clamp(art.a*nonBlack*inside*emergence,0.0,1.0));
@@ -135,8 +143,8 @@ vec3 renderPattern(vec2 patternCenter, float pin, float visionAge, float visionO
     vec2 aspect=vec2(size.x/size.y,1.0);
     // One evolving field; the eye has a separate, fixed projected sky position.
     vec2 center=Vision.xy;
-    vec2 p=(texCoord-patternCenter)*aspect*2.0;
-    vec2 visionP=(texCoord-center)*aspect*2.0;
+    vec2 p=(patternCoord-patternCenter)*aspect*2.0;
+    vec2 visionP=(visionCoord-center)*aspect*2.0;
     float opening=smoothstep(0.0,4.0,visionAge)*visionOpacity;
     float morph=smoothstep(9.0,16.0,visionAge);
     bool gloria=Eyes.z>1.5;
@@ -238,7 +246,7 @@ vec3 renderPattern(vec2 patternCenter, float pin, float visionAge, float visionO
     vec2 sealFinal=imageCenter+vec2((.506-.5)*imageSize.x/aspect.x,(.5-.231)*imageSize.y);
     vec2 sealCenter=mix(center,sealFinal,rise);
     float sealRadius=mix(.0975,.1385,rise);
-    vec2 sealQ=(texCoord-sealCenter)*aspect/sealRadius;
+    vec2 sealQ=(visionCoord-sealCenter)*aspect/sealRadius;
     vec2 sealUV=vec2(.506,.231)+vec2(sealQ.x,-sealQ.y)*vec2(.147,.173);
     float seal=texture(RitualSampler,clamp(sealUV,vec2(0),vec2(1))).r;
     seal*=1.0-smoothstep(.98,1.06,length(sealQ));
@@ -246,7 +254,7 @@ vec3 renderPattern(vec2 patternCenter, float pin, float visionAge, float visionO
     vec3 apparition=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.96),morph);
     pattern=mix(pattern,apparition,clamp(seal*sealAmount,0.0,1.0));
     // Distorted colored fragments settle into the original, unmodified ritual.
-    vec2 imageUV=(texCoord-imageCenter)*aspect/imageSize+vec2(.5);
+    vec2 imageUV=(visionCoord-imageCenter)*aspect/imageSize+vec2(.5);
     imageUV.y=1.0-imageUV.y;
     float inside=step(0.0,imageUV.x)*step(imageUV.x,1.0)*step(0.0,imageUV.y)*step(imageUV.y,1.0);
     vec2 wave=vec2(sin(imageUV.y*31.0+t*.24),cos(imageUV.x*27.0-t*.21));
@@ -254,7 +262,7 @@ vec3 renderPattern(vec2 patternCenter, float pin, float visionAge, float visionO
     // Continuous UV deformation; no pixel-grid quantization.
     float lines=texture(RitualSampler,clamp(formingUV,vec2(0),vec2(1))).r*inside;
     float emergence=reveal*visionOpacity;
-    vec2 imageP=(texCoord-imageCenter)*aspect/(imageSize*.65);
+    vec2 imageP=(visionCoord-imageCenter)*aspect/(imageSize*.65);
     float backdrop=(1.0-smoothstep(.7,1.25,length(imageP)))*emergence;
     pattern*=1.0-backdrop*.72;
     vec3 ink=mix(.5+.5*cos(vec3(0,2.0944,4.1888)+phase),vec3(.98),reveal);
@@ -286,19 +294,19 @@ void main() {
     float strength=Fractal.y, danger=Fractal.z;
     vec2 size=vec2(textureSize(InSampler,0));
     vec2 aspect=vec2(size.x/size.y,1.0);
-    // Position is projected from the captured world direction; never blend it with the reticle.
-    vec2 anchor=Vision.xy;
-    // Let an off-screen apparition leave the view, rather than dragging the entire
-    // background toward a perspective singularity or freezing its center at a clamp.
-    vec2 outside=max(abs(anchor-vec2(.5))-vec2(.5),vec2(0))*aspect;
-    float visibility=1.0-smoothstep(.15,.55,length(outside));
-    float blend=clamp(Vision.w*visibility,0.0,1.0);
-    // Warp one field into the eye instead of dissolving between two fractals.
-    // Only the background's coordinate frame relaxes back on interruption;
-    // all eye/iris/ritual geometry remains centered on the fixed sky anchor.
-    vec2 patternCenter=mix(vec2(.5),anchor,blend);
+    // Reconstruct this pixel's world ray, then intersect the frozen sky frame.
+    // The right/up vectors never follow the camera after the eye forms.
+    vec4 point=mat4(Ray0,Ray1,Ray2,Ray3)*vec4(texCoord*2.0-1.0,.5,1.0);
+    vec3 ray=normalize(point.xyz*(point.w<0.0?-1.0:1.0));
+    float facing=dot(ray,SkyForward.xyz);
+    vec2 local=vec2(dot(ray,SkyRight.xyz),dot(ray,SkyUp.xyz))
+            /(max(.01,facing)*2.0*max(.05,SkyForward.w));
+    visionCoord=vec2(.5)+local/aspect;
+    float blend=clamp(Vision.w,0.0,1.0)*smoothstep(.01,.08,facing);
+    // Still one continuous field. Only eye geometry is fully world-fixed throughout.
+    patternCoord=mix(texCoord,visionCoord,blend);
     float pin=smoothstep(0.0,6.0,Eyes.w)*blend;
-    vec3 pattern=renderPattern(patternCenter,pin,Vision.z,blend);
+    vec3 pattern=renderPattern(vec2(.5),pin,Vision.z,blend);
     float luminance=dot(scene,vec3(0.2126,0.7152,0.0722));
     // At full health there is no blanket overlay: only genuinely dark pixels reveal it.
     float shadow=1.0-smoothstep(0.015,0.20,luminance);

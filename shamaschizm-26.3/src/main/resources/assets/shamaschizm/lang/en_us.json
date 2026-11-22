@@ -176,5 +176,8 @@
   "enchantment.shamaschizm.withering": "Withering",
   "item.shamaschizm.sacred_heart": "Crystal Heart",
   "item.shamaschizm.dreamcatcher": "Dreamcatcher",
-  "item.shamaschizm.grimoire_of_nerodemus": "Grimoire of Nerodemus"
+  "item.shamaschizm.grimoire_of_nerodemus": "Grimoire of Nerodemus",
+  "item.shamaschizm.poppy_stew": "Suspicious Stew",
+  "effect.shamaschizm.stew_motion_blur": "Stew Motion Blur",
+  "effect.shamaschizm.stew_eyelids": "Heavy Eyelids"
 }

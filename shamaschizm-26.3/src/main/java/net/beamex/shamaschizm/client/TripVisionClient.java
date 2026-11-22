@@ -11,6 +11,12 @@ public final class TripVisionClient {
     private static TripVisionState state=new TripVisionState();
     private static Vec3 anchor,previousLook,previousPosition;
     private static float anchorAge;
+    private static Vec3 skyRight=new Vec3(1,0,0),skyUp=new Vec3(0,1,0);
+    private static float skyScale=1F;
+    public static Vec3 skyForward(){return anchor==null?new Vec3(0,0,-1):anchor;}
+    public static Vec3 skyRight(){return skyRight;}
+    public static Vec3 skyUp(){return skyUp;}
+    public static float skyScale(){return skyScale;}
     private static Vec3 lastProjection=new Vec3(.5,.5,1);
     private static int ritual; // 0: original ritual; 1: Homo Nucleus; 2: Gloria. Stable until the next revelation.
     private TripVisionClient(){}
@@ -49,6 +55,11 @@ public final class TripVisionClient {
                      TripVisionState.moon(mc.level.getOverworldClockTime()),darkness,steady,aligned);
         if(!was&&state.anchored){
             anchor=look;anchorAge=0;lastProjection=new Vec3(.5,.5,1);
+            // Freeze the entire sky frame, not just its center direction.
+            skyRight=look.cross(new Vec3(camera.upVector())).normalize();
+            skyUp=skyRight.cross(look).normalize();
+            float focal=mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState.projectionMatrix.m11();
+            skyScale=1F/Math.max(.05F,Math.abs(focal));
             ritual=java.util.concurrent.ThreadLocalRandom.current().nextInt(3);
         }
         // Keep the world direction while the apparition fades. Once it is gone,

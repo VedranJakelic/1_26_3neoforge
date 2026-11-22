@@ -148,15 +148,17 @@ public final class EarthwormEntity extends PathfinderMob {
   super.checkDespawn();
   if(isRemoved()||isPersistenceRequired()||requiresCustomPersistence()){unseenTicks=0;return;}
   if(!(level() instanceof ServerLevel server)||tickCount%10!=0)return;
-  boolean observed=false;
+  boolean observed=net.beamex.shamaschizm.world.SchizmPopulationViews.nearPortal(this);
   for(var player:server.players()){
    if(!player.isAlive()||player.isSpectator()||player.distanceToSqr(this)>48*48)continue;
+   if(net.beamex.shamaschizm.world.dungeon.DeepRoomZones.bugHabitat(server,blockPosition())&&player.distanceToSqr(this)<=32*32){observed=true;break;}
    Vec3 toward=getBoundingBox().getCenter().subtract(player.getEyePosition()).normalize();
    if(player.getLookAngle().dot(toward)>=.20&&player.hasLineOfSight(this)){observed=true;break;}
   }
   if(observed)unseenTicks=0;
-  else if((unseenTicks+=10)>=100)discard();
+  else if((unseenTicks+=10)>=(net.beamex.shamaschizm.world.dungeon.DeepRoomZones.bugHabitat(server,blockPosition())?60:100))discard();
  }
  @Override protected void addAdditionalSaveData(ValueOutput out){super.addAdditionalSaveData(out);out.putInt("WisdomFallenLifetime",fallenLifetime);out.putBoolean("WisdomFallenLanded",fallenLanded);out.store("WisdomFlopVelocity",Vec3.CODEC,flopVelocity);out.putDouble("WormClock",clock);out.putDouble("WormHeading",heading);out.store("WormTrail",Vec3.CODEC.listOf(),trail);}
  @Override protected void readAdditionalSaveData(ValueInput in){super.readAdditionalSaveData(in);fallenLifetime=in.getIntOr("WisdomFallenLifetime",-1);fallenLanded=in.getBooleanOr("WisdomFallenLanded",false);flopVelocity=in.read("WisdomFlopVelocity",Vec3.CODEC).orElse(Vec3.ZERO);getAttribute(Attributes.MAX_HEALTH).setBaseValue(1);setHealth(Math.min(getHealth(),getMaxHealth()));clock=in.getDoubleOr("WormClock",0);heading=in.getDoubleOr("WormHeading",0);targetHeading=heading;trail.clear();trail.addAll(in.read("WormTrail",Vec3.CODEC.listOf()).orElse(List.of()));lastHead=position();setSilent(true);}
 }
+

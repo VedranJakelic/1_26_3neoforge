@@ -54,6 +54,11 @@ public final class SchizmTeleporter {
     }
 
     public static void teleportOverworldToSchizm(ServerPlayer player, BlockPos touched) {
+        if (net.beamex.shamaschizm.loading.DungeonLoading.active(player)) return;
+        teleportOverworldToSchizm(player, touched, false);
+    }
+
+    private static void teleportOverworldToSchizm(ServerPlayer player, BlockPos touched, boolean loadingReady) {
         ServerLevel target = player.level().getServer().getLevel(Schizm.KEY);
         if (target == null) return;
         BlockPos source = canonical((ServerLevel) player.level(), touched);
@@ -61,6 +66,14 @@ public final class SchizmTeleporter {
         PortalLinks.Link link = data.source(source);
         if (link == null) {
             if (generationBlocked(target, source)) return;
+            if (!loadingReady) {
+                net.beamex.shamaschizm.loading.DungeonLoading.begin(player, () -> {
+                    if (!player.isAlive() || !player.level().dimension().equals(Level.OVERWORLD)) return;
+                    try { teleportOverworldToSchizm(player, source, true); }
+                    catch (RuntimeException error) { generationFailed(player, target, source); throw error; }
+                });
+                return;
+            }
             int y = target.getMaxY() - SchizmDungeonGenerator.MAX_ROOM_HEIGHT;
             var prepared = SchizmDungeonGenerator.prepare(target, y - 1,
                     target.getSeed() ^ source.asLong());
@@ -168,3 +181,4 @@ public final class SchizmTeleporter {
         player.fallDistance = 0;
     }
 }
+

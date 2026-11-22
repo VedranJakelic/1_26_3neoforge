@@ -77,6 +77,90 @@
               0
             ]
           }
+        ],
+        "VisionRay0": [
+          {
+            "name": "Ray0",
+            "type": "vec4",
+            "value": [
+              1,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "VisionRay1": [
+          {
+            "name": "Ray1",
+            "type": "vec4",
+            "value": [
+              0,
+              1,
+              0,
+              0
+            ]
+          }
+        ],
+        "VisionRay2": [
+          {
+            "name": "Ray2",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "VisionRay3": [
+          {
+            "name": "Ray3",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        ],
+        "VisionForward": [
+          {
+            "name": "SkyForward",
+            "type": "vec4",
+            "value": [
+              0,
+              0,
+              -1,
+              1
+            ]
+          }
+        ],
+        "VisionRight": [
+          {
+            "name": "SkyRight",
+            "type": "vec4",
+            "value": [
+              1,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "VisionUp": [
+          {
+            "name": "SkyUp",
+            "type": "vec4",
+            "value": [
+              0,
+              1,
+              0,
+              0
+            ]
+          }
         ]
       }
     },

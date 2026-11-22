@@ -26,7 +26,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 /** Blind floating predator: position memories come from movement and audible events only. */
-public final class TaintedWisdom extends Monster implements VibrationSystem {
+public class TaintedWisdom extends Monster implements VibrationSystem {
     private static final EntityDataAccessor<Integer> SEED = SynchedEntityData.defineId(TaintedWisdom.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> RELEASED = SynchedEntityData.defineId(TaintedWisdom.class, EntityDataSerializers.BOOLEAN);
     private static final List<EntityDataAccessor<Vector3fc>> NODES = new ArrayList<>();
@@ -85,6 +85,8 @@ public final class TaintedWisdom extends Monster implements VibrationSystem {
         }
         super.checkDespawn();
     }
+    protected boolean tickVariant(ServerLevel server) { return false; }
+    protected void setStingerPoint(int i, Vec3 p) { entityData.set(NODES.get(i), new Vector3f((float)p.x,(float)p.y,(float)p.z)); }
     @Override public void tick() {
         super.tick();
         if (!(level() instanceof ServerLevel server)) return;
@@ -103,6 +105,9 @@ public final class TaintedWisdom extends Monster implements VibrationSystem {
             if (deathTime > 0 && !wormsReleased()) releaseWorms(server);
             return;
         }
+        if (tickVariant(server)) return;
+        var commanded = net.beamex.shamaschizm.wisdom.giant.WisdomBrood.target(this);
+        if (commanded != null) { heardPosition=commanded.position(); heardUntil=server.getGameTime()+10; }
         setNoGravity(true); setTarget(null); getNavigation().stop();
         // Teleporting must not retain an incoming vibration or a destination in a distant portal room.
         if(previousPosition!=null&&previousPosition.distanceToSqr(position())>16){

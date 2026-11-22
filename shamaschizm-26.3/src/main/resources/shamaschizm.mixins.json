@@ -18,7 +18,24 @@
     "SchizmDeathMessageMixin",
     "MaidenSpawnEggFacingMixin",
     "MaidenSummonFacingMixin",
-    "GloriaHornMixin"
+    "GloriaHornMixin",
+    "DungeonLoadingMovementMixin",
+    "DungeonLoadingCollisionMixin",
+    "SchizmNaturalSpawnerMixin",
+    "SchizmSpawnStateMixin",
+    "SchizmLocalMobCapMixin",
+    "SchizmMobCountsAccessor",
+    "BabyRoachCollisionMixin",
+    "GrimoireLecternMixin",
+    "GiantWisdomCentipedeMixin",
+    "GiantWisdomRoachMixin",
+    "GiantWisdomMobAccessor",
+    "EclipseLunarClockMixin",
+    "EclipseMusicMixin",
+    "EclipseSkyMixin",
+    "EclipseSkyStateMixin",
+    "EclipseSunburnMixin",
+    "EclipseAstralServerMixin"
   ],
   "client": [
     "PortalSkyDarknessMixin",
@@ -43,7 +60,12 @@
     "PortalSoundContinuityMixin",
     "TatteredBannerRenderStateMixin",
     "TatteredBannerRendererMixin",
-    "SurfaceEyeProjectionMixin"
+    "SurfaceEyeProjectionMixin",
+    "DungeonLoadingRenderMixin",
+    "EclipseSkyStateMixin",
+    "EclipseSkyMixin",
+    "EclipseMusicMixin",
+    "EclipseAstralClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

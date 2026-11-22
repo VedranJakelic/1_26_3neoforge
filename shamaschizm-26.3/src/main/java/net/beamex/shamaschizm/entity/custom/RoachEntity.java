@@ -93,11 +93,11 @@ public class RoachEntity extends PathfinderMob {
         if (!(this.level() instanceof ServerLevel level)
                 || this.tickCount % VISIBILITY_CHECK_INTERVAL != 0) return;
 
-        if (isObservedByAnyPlayer(level)) {
+        if (net.beamex.shamaschizm.world.SchizmPopulationViews.nearPortal(this) || isObservedByAnyPlayer(level)) {
             this.unseenTicks = 0;
         } else {
             this.unseenTicks += VISIBILITY_CHECK_INTERVAL;
-            if (this.unseenTicks >= UNSEEN_DESPAWN_TICKS) this.discard();
+            if (this.unseenTicks >= (net.beamex.shamaschizm.world.dungeon.DeepRoomZones.bugHabitat(level, this.blockPosition()) ? 60 : UNSEEN_DESPAWN_TICKS)) this.discard();
         }
     }
 
@@ -106,6 +106,8 @@ public class RoachEntity extends PathfinderMob {
             if (!player.isAlive() || player.isSpectator() || player.distanceToSqr(this) > OBSERVATION_DISTANCE_SQR) {
                 continue;
             }
+            // Keep nearby unseen bugs: a swarm must survive ahead of, beside and beneath you.
+            if (net.beamex.shamaschizm.world.dungeon.DeepRoomZones.bugHabitat(level, this.blockPosition()) && player.distanceToSqr(this) <= 32 * 32) return true;
             Vec3 towardRoach = this.getBoundingBox().getCenter()
                     .subtract(player.getEyePosition()).normalize();
             if (player.getLookAngle().dot(towardRoach) >= VIEW_CONE_DOT
@@ -139,3 +141,4 @@ public class RoachEntity extends PathfinderMob {
         return true;
     }
 }
+

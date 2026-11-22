@@ -1,5 +1,6 @@
 package net.beamex.shamaschizm.earthworm;
 
+import net.beamex.shamaschizm.eclipse.Eclipses;
 import net.beamex.shamaschizm.Shamaschizm;
 import net.beamex.shamaschizm.world.Schizm;
 import net.beamex.shamaschizm.world.dungeon.GardenZoneEntity;
@@ -39,10 +40,10 @@ public final class EarthwormSpawns {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void potentialSpawns(LevelEvent.PotentialSpawns event) {
         if (!(event.getLevel() instanceof ServerLevel level)
-                || !level.dimension().equals(Schizm.KEY)
+                || !Eclipses.habitat(level, event.getPos())
                 || event.getMobCategory() != MobCategory.AMBIENT
                 || GardenZoneEntity.contains(level, event.getPos())) return;
-        float depth = Mth.clamp((210F - event.getPos().getY()) / 160F, 0F, 1F);
+        float depth = Mth.clamp((210F - Eclipses.y(level, event.getPos())) / 160F, 0F, 1F);
         int weight = Math.round(Mth.lerp(depth, 24F, 90F));
         event.addSpawnerData(new Weighted<>(
                 new MobSpawnSettings.SpawnerData(Earthworms.TYPE, UniformInt.of(1, 4)), weight));

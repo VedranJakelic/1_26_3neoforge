@@ -1,5 +1,6 @@
 package net.beamex.shamaschizm.event;
 
+import net.beamex.shamaschizm.eclipse.Eclipses;
 import net.beamex.shamaschizm.Shamaschizm;
 import net.beamex.shamaschizm.world.Schizm;
 import net.beamex.shamaschizm.world.ai.SchizmZombieGoal;
@@ -18,7 +19,7 @@ import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 
 @EventBusSubscriber(modid = Shamaschizm.MOD_ID)
 public final class SchizmMobEvents {
-    /** Schizm-only local cap; vanilla's comparable hostile cap is much higher. */
+    /** Broad Schizm-only density guard, separate from the vanilla population budget. */
     private static final int MAX_NEARBY_HOSTILES = 22;
     private static final double CAP_HORIZONTAL_RADIUS = 64.0;
     private static final double CAP_VERTICAL_RADIUS = 48.0;
@@ -32,7 +33,7 @@ public final class SchizmMobEvents {
     @SubscribeEvent
     public static void checkSpawn(MobSpawnEvent.PositionCheck event) {
         ServerLevel level = event.getLevel().getLevel();
-        if (!level.dimension().equals(Schizm.KEY)) return;
+        if (!Eclipses.habitat(level, event.getEntity().blockPosition())) return;
 
         if (forbidden(event.getEntity())) {
             event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
@@ -77,3 +78,4 @@ public final class SchizmMobEvents {
         }
     }
 }
+

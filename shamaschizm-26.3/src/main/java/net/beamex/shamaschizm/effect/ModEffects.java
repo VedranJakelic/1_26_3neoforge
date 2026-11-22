@@ -17,5 +17,17 @@ public final class ModEffects {
             () -> new MobEffect(MobEffectCategory.HARMFUL, 0xAA33FF) {}
     );
 
+    public static final DeferredHolder<MobEffect, MobEffect> STEW_MOTION_BLUR =
+            EFFECTS.register(
+                    "stew_motion_blur",
+                    () -> new MobEffect(MobEffectCategory.NEUTRAL, 0xAA33FF) {}
+            );
+
+    public static final DeferredHolder<MobEffect, MobEffect> STEW_EYELIDS =
+            EFFECTS.register(
+                    "stew_eyelids",
+                    () -> new MobEffect(MobEffectCategory.NEUTRAL, 0x111111) {}
+            );
+
     private ModEffects() {}
 }

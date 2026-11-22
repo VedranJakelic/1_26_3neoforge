@@ -25,17 +25,20 @@ public final class WisdomRenderer extends EntityRenderer<TaintedWisdom, WisdomRe
     public static final class State extends EntityRenderState {
         final Vector3f[] rope = new Vector3f[StingerRope.NODES];
         WisdomAttachments.Anchor[] anchors;
-        float yaw;
+        float yaw, scale = 1, sparks;
         boolean released;
     }
     public WisdomRenderer(EntityRendererProvider.Context context) { super(context); shadowRadius = .3F; }
     @SubscribeEvent public static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(WisdomRegistration.TYPE, WisdomRenderer::new);
+        event.registerEntityRenderer(net.beamex.shamaschizm.wisdom.giant.GiantWisdomRegistration.TYPE, WisdomRenderer::new);
     }
     @Override public State createRenderState() { return new State(); }
-    @Override protected AABB getBoundingBoxForCulling(TaintedWisdom entity, float partial) { return entity.getBoundingBox().inflate(3); }
+    @Override protected AABB getBoundingBoxForCulling(TaintedWisdom entity, float partial) { return entity.getBoundingBox().inflate(entity instanceof net.beamex.shamaschizm.wisdom.giant.GiantWisdom ? 8 : 3); }
     @Override public void extractRenderState(TaintedWisdom entity, State state, float partial) {
         super.extractRenderState(entity, state, partial);
+        state.scale = entity instanceof net.beamex.shamaschizm.wisdom.giant.GiantWisdom ? 3 : 1;
+        state.sparks = state.scale > 1 && entity.deathTime > 0 ? entity.deathTime + partial : 0;
         state.yaw = entity.getYRot(); state.anchors = entity.anchors(); state.released = entity.wormsReleased();
         for (int i = 0; i < StingerRope.NODES; i++) state.rope[i] = entity.stingerPoint(i);
     }
@@ -45,7 +48,7 @@ public final class WisdomRenderer extends EntityRenderer<TaintedWisdom, WisdomRe
             for (float[] v : WisdomMesh.VERTICES) {
                 Vec3 point, normal;
                 if (v[0] == 0) {
-                    point = WisdomAttachments.rotate(new Vec3(v[1], v[2], v[3]), state.yaw);
+                    point = WisdomAttachments.rotate(new Vec3(v[1], v[2], v[3]).scale(state.scale), state.yaw);
                     normal = WisdomAttachments.rotate(new Vec3(v[6], v[7], v[8]), state.yaw);
                 } else {
                     int segment = 0;
@@ -58,7 +61,7 @@ public final class WisdomRenderer extends EntityRenderer<TaintedWisdom, WisdomRe
                     if (right.lengthSqr() < 1e-8) right = up.cross(new Vec3(1, 0, 0));
                     right = right.normalize(); Vec3 back = right.cross(up).normalize();
                     point = new Vec3(a.x + (b.x-a.x)*t, a.y + (b.y-a.y)*t, a.z + (b.z-a.z)*t)
-                            .add(right.scale(v[1])).add(back.scale(v[3]));
+                            .add(right.scale(v[1]*state.scale)).add(back.scale(v[3]*state.scale));
                     normal = right.scale(v[6]).add(up.scale(v[7])).add(back.scale(v[8]));
                 }
                 vertices.addVertex(matrix, (float)point.x, (float)point.y, (float)point.z).setColor(-1)
@@ -66,6 +69,7 @@ public final class WisdomRenderer extends EntityRenderer<TaintedWisdom, WisdomRe
                         .setNormal(matrix, (float)normal.x, (float)normal.y, (float)normal.z);
             }
         });
+        if (state.sparks > 0) net.beamex.shamaschizm.wisdom.giant.client.BrainSparks.submit(state.sparks, state.yaw, pose, collector);
         if (state.released) return;
         collector.submitCustomGeometry(pose, RenderTypes.entityCutout(Shamaschizm.id("textures/entity/earthworm.png")), (matrix, vertices) -> {
             for (var anchor : state.anchors) {

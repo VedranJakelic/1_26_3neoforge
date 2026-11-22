@@ -222,16 +222,18 @@
     { "template": "shamaschizm:room178", "tag": "deep", "weight": 2 },
     { "template": "shamaschizm:room179", "tag": "deep", "weight": 2 },
     { "template": "shamaschizm:room180", "tag": "deep", "weight": 2 },
-    { "template": "shamaschizm:room181", "tag": "deep", "weight": 2 },
-    { "template": "shamaschizm:room182", "tag": "normal", "weight": 1 },
-    { "template": "shamaschizm:room183", "tag": "normal", "weight": 1 },
+    { "template": "shamaschizm:room181", "tag": "relic", "weight": 2 },
+    { "template": "shamaschizm:room182", "tag": "relic", "weight": 2 },
+    { "template": "shamaschizm:room183", "tag": "relic", "weight": 2 },
     { "template": "shamaschizm:room184", "tag": "normal", "weight": 1 },
     { "template": "shamaschizm:room185", "tag": "deep", "weight": 2 },
     { "template": "shamaschizm:room186", "tag": "deep", "weight": 2 },
     { "template": "shamaschizm:room187", "tag": "deep", "weight": 2 },
-    { "template": "shamaschizm:room188", "tag": "normal", "weight": 1 },
+    { "template": "shamaschizm:room188", "tag": "relic", "weight": 2 },
     { "template": "shamaschizm:room189", "tag": "normal", "weight": 2 },
     { "template": "shamaschizm:room190", "tag": "normal", "weight": 2 },
-    { "template": "shamaschizm:room191", "tag": "relic", "weight": 2 }
+    { "template": "shamaschizm:room191", "tag": "relic", "weight": 1 },
+    { "template": "shamaschizm:room192", "tag": "relic", "weight": 15 },
+    { "template": "shamaschizm:room193", "tag": "relic", "weight": 15 }
   ]
 }

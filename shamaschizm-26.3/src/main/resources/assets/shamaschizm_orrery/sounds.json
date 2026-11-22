@@ -1,0 +1,27 @@
+{
+  "squeak": {
+    "subtitle": "subtitles.shamaschizm.orrery_squeak",
+    "sounds": [
+      {
+        "name": "shamaschizm_orrery:squeak1",
+        "stream": false
+      },
+      {
+        "name": "shamaschizm_orrery:squeak2",
+        "stream": false
+      },
+      {
+        "name": "shamaschizm_orrery:squeak3",
+        "stream": false
+      },
+      {
+        "name": "shamaschizm_orrery:squeak4",
+        "stream": false
+      },
+      {
+        "name": "shamaschizm_orrery:squeak5",
+        "stream": false
+      }
+    ]
+  }
+}
